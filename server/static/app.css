@@ -1,0 +1,273 @@
+html {
+  --col-bg-v: 23 23 23;
+  --col-bg: rgb(var(--col-bg-v));
+  --col-white: #e2e2e2;
+  --col-accent-v: 121 255 84;
+  --col-accent: rgb(var(--col-accent-v));
+  --bk-large: 1024px;
+
+  background-color: var(--col-bg);
+  color: var(--col-white);
+  line-height: 1.2;
+  font-size: 18px;
+}
+
+::selection {
+  background-color: rgba(var(--col-accent-v) / 60%);
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  max-width: var(--bk-large);
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.message-container-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 4em 2em 8em;
+}
+
+.message {
+}
+
+.message:last-child {
+  margin-bottom: 0 !important;
+}
+
+.message-user {
+  color: var(--col-accent);
+  margin-bottom: 1em;
+}
+
+.message-system {
+  margin-bottom: 3.5em;
+  position: relative;
+
+  & .message-text {
+    position: relative;
+    background: var(--col-bg);
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0 0.7em;
+  }
+}
+
+.message-system-error {
+  color: red;
+}
+
+.message-system.message-system-intro {
+  color: #b1b1b1;
+  /* Smaller margin if is not last intro msg.
+     Last message has sibling that is not .message-system-intro */
+  &:not(:has(+ :not(.message-system-intro))) {
+    margin-bottom: 0.5em;
+  }
+  &::before {
+    display: none;
+  }
+}
+
+.message-system::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 100%;
+  height: 1px;
+  background-color: #7e7e7e;
+}
+
+.message-ai {
+  margin-bottom: 3.5em;
+}
+
+.message-ai-error {
+  color: red;
+}
+
+.message-ai-empty .message-text {
+  --loading-grey: #ffffff25;
+  width: 50%;
+  border-radius: 0.25em;
+  background-color: var(--loading-grey);
+  background: linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 60%
+    )
+    var(--loading-grey);
+  background-size: 200% 100%;
+  background-position-x: 180%;
+  animation: 2s loading ease-in-out infinite;
+}
+@keyframes loading {
+  to {
+    background-position-x: -20%;
+  }
+}
+
+.message-text {
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.message-meta {
+  color: #a5a5a5;
+  font-size: 0.9em;
+  text-align: center;
+
+  & .colored {
+    color: var(--col-accent);
+  }
+
+  & a,
+  & .toggle-source-btn {
+    color: #4bc2fd;
+    transition: color 0.15s;
+    cursor: pointer;
+  }
+  & a:hover,
+  & .toggle-source-btn:hover {
+    color: #83d6ff;
+  }
+}
+
+.toggle-source-btn {
+  background: transparent;
+  margin-left: 0.2em;
+}
+
+.source-text {
+  margin: 0.5em 0 2em;
+  border-left: 6px solid var(--col-accent);
+  text-align: left;
+  padding-left: 0.5em;
+  color: var(--col-white);
+}
+
+.user-input {
+  --shadow-size: 10px;
+  --shadow-opacity: 80;
+  --blur-size: 80px;
+  --roundness: 20px;
+  --max-w: 720px;
+  position: fixed;
+  bottom: 2em;
+  width: var(--max-w);
+  max-width: 100%;
+  border: 2px solid rgba(var(--col-accent-v) / 80);
+  box-shadow: 0 0 var(--shadow-size)
+    rgba(var(--col-accent-v) / var(--shadow-opacity));
+  backdrop-filter: blur(var(--blur-size));
+  background-color: rgba(--col-bg-v / 80);
+  border-radius: var(--roundness);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8em 1.5em;
+  transition: box-shadow 0.15s;
+}
+
+.user-input:focus-within {
+  --shadow-size: 25px;
+}
+
+.user-input-content {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.user-input-field {
+  display: block;
+  background: transparent;
+  flex-grow: 1;
+  color: var(--col-white);
+
+  &,
+  &:focus,
+  &:focus-visible {
+    border: none;
+    outline: none;
+  }
+}
+
+.reset-focus-states {
+  &,
+  &:focus,
+  &:focus-visible {
+    border: none;
+    outline: none;
+  }
+}
+
+.github-btn {
+  background: transparent;
+  color: var(--col-white);
+  transition: color 0.15s;
+  cursor: pointer;
+  display: inline-block;
+  margin-right: 0.6em;
+
+  &:hover {
+    color: rgba(var(--col-accent-v) / 80%);
+  }
+
+  & svg {
+    transform: translateY(3px);
+  }
+}
+
+.user-input-side-btn {
+  background: transparent;
+  color: var(--col-white);
+  transition: color 0.15s;
+  cursor: pointer;
+
+  &:hover {
+    color: rgba(var(--col-accent-v) / 80%);
+  }
+
+  & svg {
+    transform: translateY(3px);
+  }
+}
+
+.user-input-reconnect-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin: 0 auto;
+  background: transparent;
+  color: var(--col-white);
+  transition: color 0.15s;
+
+  &:hover {
+    color: rgba(var(--col-accent-v) / 80%);
+  }
+}
+
+.user-input-reconnecting {
+  text-align: center;
+}
+
+.awaiting-response {
+  text-align: center;
+  padding: 5px 0 6px;
+}

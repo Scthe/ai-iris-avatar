@@ -1,0 +1,12 @@
+# python
+__pycache__
+env
+.venv
+
+# misc
+*.code-workspace
+.vscode
+
+# my
+_references
+voice_to_clone.wav

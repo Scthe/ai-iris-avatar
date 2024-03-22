@@ -1,0 +1,24 @@
+/Library
+/Logs
+/Recordings
+/Temp
+/UserSettings
+/*.blob
+
+/Plugin/.build
+/Plugin/.xcodebuild
+
+*.csproj
+*.sln
+
+# my
+Packages/com.unity.render-pipelines.high-definition-config
+Assets/Oculus
+*.meta
+*.jpg
+*.png
+*.fbx
+*.mat
+*.shadergraph
+*.controller
+*.anim
