@@ -2,12 +2,13 @@
 __pycache__
 
 # app folders
-models/*.pt
+models/*
+!models/.gitkeep
 # image test result
 images_test_results/*.png
 # input images to generate samples from
 images_raw/*
 !images_raw/.gitkeep
-# generated samples: 64x64 px
-samples_gen_64/*
-!samples_gen_64/.gitkeep
+# generated samples
+samples_gen*
+!samples_gen_*/.gitkeep

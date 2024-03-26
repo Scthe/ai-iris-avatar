@@ -1,30 +1,10 @@
-from os import listdir
-from os.path import join, isfile, splitext, getmtime, basename
-
+from os.path import join, splitext, basename
+from typing import List, Optional
 from termcolor import colored
 
-from .cnn import pick_device, load_model, train, save_model, style_transfer, save_image
-
-MODEL_EXT = ".pt"
-
-
-def find_model_file(models_dir, force_new=False):
-    if force_new:
-        return None
-
-    def is_model_file(f):
-        fullpath = join(models_dir, f)
-        # print(fullpath, isfile(fullpath), splitext(f)[1])
-        return isfile(fullpath) and splitext(f)[1] == MODEL_EXT
-
-    models = [join(models_dir, f) for f in listdir(models_dir) if is_model_file(f)]
-    # print(models)
-    if not models:
-        print("No previous model found")
-        return None
-
-    models.sort(key=lambda x: getmtime(x))
-    return models[-1]
+from .model_storage import ModelStorage
+from .training_reporter import TrainingReporter
+from .cnn import pick_device, load_model, train, style_transfer, save_image
 
 
 def generate_date_for_filename():
@@ -32,13 +12,6 @@ def generate_date_for_filename():
 
     now = datetime.now()
     return now.strftime("%Y-%m-%d--%H-%M-%S")
-
-
-def args_require(args, key):
-    value = vars(args)[key]
-    if value is None:
-        raise Exception(f"Missing program arg: '{key}'")
-    return value
 
 
 def exec_train(
@@ -49,23 +22,31 @@ def exec_train(
     epochs: int,
     batch_size: int,
     learning_rate: float,
+    test_image: Optional[str],
+    checkpoint_schedule: List[int],
 ):
     [device, device_name] = pick_device(use_cpu)
     print(colored("Using device:", "blue"), f"'{device_name}'({device})")
 
-    model_path = find_model_file(models_dir, new_model)
-    model = load_model(model_path)
-    model = model.to(device)
+    datestamp = generate_date_for_filename()
+    model_storage = ModelStorage(models_dir, datestamp)
+    print(colored("Output directory:", "blue"), model_storage.store_dir)
+    model_path = model_storage.find_model_file(new_model)
+    model = load_model(device, model_path)
     print(colored("Model:", "blue"), model)
 
-    train(device, model, samples_dir, epochs, batch_size, learning_rate)
+    training_reporter = TrainingReporter(
+        model, epochs, test_image, checkpoint_schedule, model_storage
+    )
+    print(colored("Checkpoint schedule:", "blue"), checkpoint_schedule)
+
+    train(
+        device, model, samples_dir, epochs, batch_size, learning_rate, training_reporter
+    )
     print(colored("Training finshed", "green"))
 
     # save model params
-    out_date = generate_date_for_filename()
-    out_filename = join(models_dir, f"st_model.{out_date}.pt")
-    print(colored("Saving model parameters to:", "blue"), f"'{out_filename}'")
-    save_model(model, out_filename)
+    training_reporter.store_checkpoint(epochs, is_final=True)
 
 
 def exec_infer(
@@ -77,9 +58,11 @@ def exec_infer(
     [device, device_name] = pick_device(use_cpu)
     print(colored("Using device:", "blue"), f"'{device_name}'({device})")
 
-    model_path = find_model_file(models_dir)
-    model = load_model(model_path)
-    model = model.to(device)
+    model_storage = ModelStorage(models_dir)
+    model_path = model_storage.find_model_file()
+    if model_path == None:
+        raise Exception(f"No checkpoint model found in: '{models_dir}'")
+    model = load_model(device, model_path)
     print(colored("Model:", "blue"), model)
 
     result = style_transfer(device, model, img_path)

@@ -79,7 +79,13 @@ def st_generate_samples(count, gen_64, input):
     type=click.Path(exists=True),
     help="Directory with training samples",
 )
-def st_train(epochs, new_model, cpu, input):
+@click.option(
+    "--test-image",
+    "-ti",
+    type=click.Path(exists=True),
+    help="Infer this image on every checkpoint",
+)
+def st_train(epochs, new_model, cpu, input, test_image):
     """Style transfer: Train the cnn."""
     from style_transfer_cnn.style_transfer import exec_train
     from os.path import join
@@ -88,6 +94,8 @@ def st_train(epochs, new_model, cpu, input):
     BATCH_SIZE = 20
     # LEARNING_RATE = 0.0000001
     LEARNING_RATE = 0.00001
+    cp_step = 100
+    checkpoint_schedule = [x for x in range(0, epochs, cp_step) if x > 0 and x < epochs]
 
     with Timer() as timer:
         exec_train(
@@ -98,6 +106,8 @@ def st_train(epochs, new_model, cpu, input):
             epochs=epochs,
             batch_size=BATCH_SIZE,
             learning_rate=LEARNING_RATE,
+            test_image=test_image,
+            checkpoint_schedule=checkpoint_schedule,
         )
 
     print(colored(f"Elapsed {timer.delta :4.2f}s", "green"))

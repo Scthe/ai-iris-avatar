@@ -1,5 +1,5 @@
 import os
-import timeit
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -9,6 +9,8 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.utils import save_image as torch_save_image
 from torchvision.io import read_image, ImageReadMode
 from termcolor import colored
+
+from .loss_fn import VGGPerceptualLoss
 
 # https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
 # https://www.kdnuggets.com/building-a-convolutional-neural-network-with-pytorch
@@ -30,8 +32,12 @@ def pick_device(force_cpu=False):
     return [device, name]
 
 
+conv_layer = lambda kernel_size, outputs=0: (kernel_size, outputs)
+ConvLayerDef = Tuple[int, int]
+
+
 class Net(nn.Module):
-    def __init__(self, l1_out, l1_conv_size, l2_out, l2_conv_size, l3_conv_size):
+    def __init__(self, conv_def: List[ConvLayerDef]):
         super(Net, self).__init__()
 
         conv_kwargs = {
@@ -43,17 +49,23 @@ class Net(nn.Module):
         # TODO add massive dropout layer
         # TODO weight decay
         # TODO perceptual loss fn?
-        self.conv1 = nn.Conv2d(3, l1_out, l1_conv_size, **conv_kwargs)
-        self.conv2 = nn.Conv2d(l1_out, l2_out, l2_conv_size, **conv_kwargs)
-        self.conv3 = nn.Conv2d(l2_out, 3, l3_conv_size, **conv_kwargs)
-        # self.lin1 = nn.Linear(3, 3, bias=True)
+        prev_layer_outputs = 3
+
+        def create_conv(conv_def: ConvLayerDef):
+            nonlocal prev_layer_outputs
+            kernel_size, outputs = conv_def
+            l = nn.Conv2d(prev_layer_outputs, outputs, kernel_size, **conv_kwargs)
+            prev_layer_outputs = outputs
+            return l
+
+        self.conv1 = create_conv(conv_def[0])
+        self.conv2 = create_conv(conv_def[1])
+        self.conv3 = create_conv(conv_def[2])
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, x):
-        # input 64x64x1, output 64x64xl1_out
         x = F.relu(self.conv1(x))
-        # input 64x64x64x64xl1_out, output 64x64xl2_out
-        # x = F.relu(self.conv2(x))
-        # input 64x64xl2_out, output 64x64x1
+        x = F.relu(self.conv2(x))
         x = self.conv3(x)
 
         # lin:
@@ -64,20 +76,28 @@ class Net(nn.Module):
         return x
 
 
-def load_model(filepath):
+def load_model(device, filepath: Optional[str]):
     if filepath is None:
         print(colored("Creating new model", "blue"))
-        model = Net(8, 3, 8, 3, 3)  # Net(64, 9, 32, 1, 5)
+        # model = Net(8, 3, 8, 3, 3)  # Net(64, 9, 32, 1, 5)
+        # model = Net(64, 9, 32, 1, 5)  # org. SRCNN
+        model = Net(
+            [
+                conv_layer(kernel_size=9, outputs=64),
+                conv_layer(kernel_size=1, outputs=32),
+                conv_layer(kernel_size=5, outputs=3),
+            ]
+        )
     elif os.path.isfile(filepath):
         print(colored("Loading model from:", "blue"), f"'{filepath}'")
         model = torch.load(filepath)
-        model.eval()
     else:
         raise Exception(f"Model file not found: '{filepath}'")
+    model = model.to(device)
     return model
 
 
-def save_model(model, filepath):
+def save_model(model, filepath: Optional[str]):
     torch.save(model, filepath)
 
 
@@ -98,14 +118,14 @@ def prepare_image(device, img):
 
 
 class SrcnnDataset(Dataset):
-    def __init__(self, device, image_paths):
+    def __init__(self, device, image_paths: List[str]):
         self.device = device
         self.image_paths = image_paths
 
     def __len__(self):
         return len(self.image_paths)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         x_path, y_path = self.image_paths[idx]
         x_image = prepare_image(self.device, x_path)
         y_image = prepare_image(self.device, y_path)
@@ -150,7 +170,7 @@ def list_samples(samples_dir: str):
     return result
 
 
-def create_data_loader(device, img_paths, batch_size, is_train=False):
+def create_data_loader(device, img_paths: List[str], batch_size: int, is_train=False):
     ds = SrcnnDataset(device, img_paths)
     params = {
         "batch_size": batch_size,
@@ -161,7 +181,7 @@ def create_data_loader(device, img_paths, batch_size, is_train=False):
     return DataLoader(ds, **params)
 
 
-def lr_mod_from_batch_size(batch_size):
+def lr_mod_from_batch_size(batch_size: int):
     """
     # Explanation:
 
@@ -179,7 +199,17 @@ def lr_mod_from_batch_size(batch_size):
     return batch_size
 
 
-def train(device, model, samples_dir, n_epochs, batch_size, learing_rate):
+def train(
+    device,
+    model: Net,
+    samples_dir: str,
+    n_epochs: int,
+    batch_size: int,
+    learning_rate: float,
+    training_reporter,
+):
+    model.train()  # train mode
+
     if n_epochs <= 0:
         raise Exception(f"Invalid epoch count: {n_epochs}")
 
@@ -199,18 +229,19 @@ def train(device, model, samples_dir, n_epochs, batch_size, learing_rate):
     print(colored(f"Train images:", "blue"), len(train_image_paths))
     print(colored(f"Validation images:", "blue"), len(validation_image_paths))
 
-    loss_fn = nn.MSELoss()
+    # loss_fn = nn.MSELoss()
+    loss_fn = VGGPerceptualLoss(device)
     optimizer = optim.SGD(
-        model.parameters(), lr=learing_rate * lr_mod_from_batch_size(batch_size)
+        model.parameters(),
+        lr=learning_rate * lr_mod_from_batch_size(batch_size),
     )
-    losses = []
     print(
         colored(f"Starting training", "blue"),
-        f"(epochs: {n_epochs}, batch_size: {batch_size}, learing_rate: {learing_rate})",
+        f"(epochs: {n_epochs}, batch_size: {batch_size}, learning_rate: {learning_rate})",
     )
 
     for epoch in range(n_epochs):
-        start = timeit.default_timer()
+        training_reporter.start_epoch()
 
         # train
         for in_image, expected in train_loader:
@@ -232,31 +263,25 @@ def train(device, model, samples_dir, n_epochs, batch_size, learing_rate):
                 # print(in_image.shape, output.shape, loss, loss.item())
                 loss_acc += loss.item()
 
-        duration = timeit.default_timer() - start
         loss_avg = loss_acc / len(validation_image_paths)
-        losses += [loss_avg]
-        max_loss = max(losses)
-        iters_left = n_epochs - epoch - 1
-        eta = "" if iters_left == 0 else f"ETA: {iters_left*duration:4.1f}s"
-        progress = (epoch + 1) * 100 // n_epochs
-        print(
-            colored(f"[{progress:3d}%] Epoch {epoch + 1:5d}:", "magenta"),
-            f"Loss: {loss_avg:2.7f} ({loss_avg * 100 / max_loss:5.1f}%). Took {duration:4.2f}s. {eta}",
-        )
+        training_reporter.report_epoch(epoch, loss_avg)
 
 
 ####################################
 # STYLE TRANSFER INFER
 
 
-def save_image(image, filepath):
+def save_image(image, filepath: str):
     torch_save_image(image, filepath)
 
 
-def style_transfer(device, model, input_image_path: str):
+def style_transfer(device, model: Net, input_image_path: str):
     print(colored("Style transfer image:", "blue"), f"'{input_image_path}'")
     my_image = prepare_image(device, input_image_path)
-    print(colored("Size:", "blue"), my_image.shape)
+    # print(colored("Size:", "blue"), my_image.shape)
 
+    model.eval()  # inference mode
     with torch.no_grad():
-        return model(my_image)
+        result = model(my_image)
+    model.train()  # train mode
+    return result

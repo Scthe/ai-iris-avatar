@@ -18,6 +18,17 @@ class Timer:
         self._start_time = None
         return self.delta
 
+    def __str__(self):
+        if self._start_time != None:
+            return "running"
+        if not self.delta:
+            return "not started"
+        minutes = self.delta % 60
+        seconds = self.delta - (minutes * 60)
+        minutes_s = f"{minutes:4.2f}min"
+        seconds_s = f"{seconds:4.2f}s"
+        return f"{minutes_s} {seconds_s}" if minutes > 0 else seconds_s
+
     def __enter__(self):
         self.start()
         return self
