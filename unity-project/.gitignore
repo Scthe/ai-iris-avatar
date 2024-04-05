@@ -14,11 +14,18 @@
 # my
 Packages/com.unity.render-pipelines.high-definition-config
 Assets/Oculus
-*.meta
+# raw resources
+*.fbx
+*.wav
 *.jpg
 *.png
-*.fbx
-*.mat
+*.tif
+*.exr
+# unity resources
+*.meta
 *.shadergraph
+*.shadersubgraph
+*.mat
 *.controller
 *.anim
+*.asset
