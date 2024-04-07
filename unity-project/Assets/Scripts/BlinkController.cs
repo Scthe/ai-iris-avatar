@@ -19,6 +19,9 @@ public class BlinkController : MonoBehaviour
   [Tooltip("Eyelashes mesh that have 'eyelidsDown' shape key")]
   public SkinnedMeshRenderer eyelashesMesh = null;
 
+  [Tooltip("Strength of 'eyelids down' shape key when idle")]
+  [Range(0.0f, 1.0f)]
+  public float IdleEyelidsDown = 0.0f;
   private readonly string SK_EYELIDS_DOWN = "eyelidsDown";
 
   // EYEBROWS DOWN
@@ -30,7 +33,7 @@ public class BlinkController : MonoBehaviour
   private readonly string SK_BROW_DOWN_R = "BROW-mad.R";
 
 
-  // EYEBROWS DOWN
+  // EYEBROWS CORNERS DOWN
   private readonly string SK_BROW_CORNER_UP_L = "BROW-surp.L";
   private readonly string SK_BROW_CORNER_UP_R = "BROW-surp.R";
   [Tooltip("Strength of 'eyebrows inner corner up' shape key")]
@@ -46,10 +49,10 @@ public class BlinkController : MonoBehaviour
 
   // TIMINGS
   [Header("Timings")]
-  [Tooltip("Shortest possible time blinks (in seconds). Usually 1s.")]
+  [Tooltip("Shortest possible time between blinks (in seconds). Usually 1s.")]
   [Range(0.1f, 10.0f)]
   public float BlinkIntervalMin = 1.0f;
-  [Tooltip("Longest possible time blinks (in seconds). Usually 5s.")]
+  [Tooltip("Longest possible time between blinks (in seconds). Usually 5s.")]
   [Range(0.1f, 10.0f)]
   public float BlinkIntervalMax = 4.0f; // 5.0f is more natural, but short demo so..
   [Tooltip("Duration of the single blink (in seconds). Usually 0.2s.")]
@@ -84,8 +87,8 @@ public class BlinkController : MonoBehaviour
     while (true)
     {
       var blinkInterval = UnityEngine.Random.Range(BlinkIntervalMin, BlinkIntervalMax);
-      Debug.LogFormat("Next blink in: {0:0.0}s", blinkInterval);
-      yield return wait(blinkInterval);
+      // Debug.LogFormat("Next blink in: {0:0.0}s", blinkInterval);
+      yield return MyUtils.wait(blinkInterval);
 
       // See animation guide linked at the top of the file for guide for choosing timings
       // float[] keyframes = { 0.3f, 1.0f, 0.9f, 0.65f, 0.3f };
@@ -106,21 +109,10 @@ public class BlinkController : MonoBehaviour
       foreach (float progress in keyframes)
       {
         ApplyBlinkShapeKeys(progress);
-        yield return wait(dt);
+        yield return MyUtils.wait(dt);
       }
 
       ClearBlinkShapeKeys();
-    }
-  }
-
-  IEnumerator wait(float waitTimeSeconds)
-  {
-    float passedTime = 0;
-
-    while (passedTime < waitTimeSeconds)
-    {
-      passedTime += Time.deltaTime; // is float (in seconds)
-      yield return null;
     }
   }
 
@@ -132,8 +124,10 @@ public class BlinkController : MonoBehaviour
     SafeSetBlendShapeWeight(bodyMesh, SK_BROW_CORNER_UP_R, EyebrowsCornerUpStr * progress);
     SafeSetBlendShapeWeight(bodyMesh, SK_SQUINT_L, SquintStr * progress);
     SafeSetBlendShapeWeight(bodyMesh, SK_SQUINT_R, SquintStr * progress);
-    SafeSetBlendShapeWeight(bodyMesh, SK_EYELIDS_DOWN, 1.0f * progress);
-    SafeSetBlendShapeWeight(eyelashesMesh, SK_EYELIDS_DOWN, 1.0f * progress);
+
+    float eyelidsDownStr = Mathf.Lerp(IdleEyelidsDown, 1.0f, progress);
+    SafeSetBlendShapeWeight(bodyMesh, SK_EYELIDS_DOWN, eyelidsDownStr);
+    SafeSetBlendShapeWeight(eyelashesMesh, SK_EYELIDS_DOWN, eyelidsDownStr);
   }
 
   void ClearBlinkShapeKeys()

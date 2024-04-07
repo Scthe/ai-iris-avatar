@@ -4,7 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// https://github.com/endel/NativeWebSocket
+// Based on code by https://stackoverflow.com/users/1934546/fibrizo-raziel
+// https://stackoverflow.com/questions/16078254/create-audioclip-from-byte
+// https://stackoverflow.com/questions/35228767/noisy-audio-clip-after-decoding-from-base64/68965193#68965193
+// https://creativecommons.org/licenses/by-sa/4.0/
 
 public readonly struct PcmHeader
 {
