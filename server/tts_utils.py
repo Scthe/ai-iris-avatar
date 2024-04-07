@@ -45,6 +45,24 @@ def exec_tts(cfg: AppConfig, tts: TTS, text: str):
 
     return wav
 
+async def exec_tts_async(cfg: AppConfig, tts: TTS, text: str,callback):
+    import asyncio
+
+    # TODO https://docs.coqui.ai/en/latest/models/xtts.html#streaming-manually
+    if len(text) <= 0:
+        return
+    # print(colored("voicing:", "green"), tokens)
+
+    async def tts_internal():
+        wav = exec_tts(cfg, tts, text)
+        bytes = wav2bytes(tts, wav)
+
+        # Remember: websockets are on TCP. Always in correct order.
+        await callback(bytes)
+
+    loop = asyncio.get_running_loop()
+    # asyncio.run(tts_internal())
+    loop.create_task(tts_internal())
 
 def exec_tts_to_file(
     cfg: AppConfig, tts: TTS, text: str, out_file_path: str, verbose=False
@@ -53,7 +71,8 @@ def exec_tts_to_file(
 
     if is_cloning:
         if verbose:
-            print(colored("Cloning voice based on:", "blue"), f"'{tts_kwargs["speaker_wav"]}'")
+            speaker = tts_kwargs.get("speaker_wav",'')
+            print(colored("Cloning voice based on:", "blue"), f"'{speaker}'")
         wav = tts.tts_with_vc_to_file(text=text, file_path=out_file_path, **tts_kwargs)
     else:
         if verbose:

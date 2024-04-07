@@ -2,6 +2,13 @@ from timeit import default_timer as timer
 import asyncio, threading
 
 
+def seconds_to_str(sec: float):
+    minutes, seconds = divmod(sec, 60)
+    minutes_s = f"{int(minutes)}min"
+    seconds_s = f"{seconds:.1f}s"
+    return f"{minutes_s} {seconds_s}" if minutes > 0 else seconds_s
+
+
 class Timer:
     def __init__(self):
         self._start_time = None
@@ -23,11 +30,7 @@ class Timer:
             return "running"
         if not self.delta:
             return "not started"
-        minutes = self.delta % 60
-        seconds = self.delta - (minutes * 60)
-        minutes_s = f"{minutes:4.2f}min"
-        seconds_s = f"{seconds:4.2f}s"
-        return f"{minutes_s} {seconds_s}" if minutes > 0 else seconds_s
+        return seconds_to_str(self.delta)
 
     def __enter__(self):
         self.start()

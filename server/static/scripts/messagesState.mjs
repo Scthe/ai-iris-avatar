@@ -110,6 +110,7 @@ export function useMessagesState() {
     messages: INSTRUCTION_MESSAGES.map(instructionMsg),
   });
 
+  // socket to server + message handler
   const socket = useSocket(SOCKET_URL, (msg) => {
     const { msgId, type } = msg;
 
@@ -140,6 +141,7 @@ export function useMessagesState() {
     }
   });
 
+  // handle socket state changes
   useEffect(() => {
     switch (socket.status) {
       case SOCKET_STATE.open: {
@@ -168,6 +170,7 @@ export function useMessagesState() {
     }
   }, [socket.status]);
 
+  // exported send message fn
   const actionSendMessage = useCallback(
     (text) => {
       const respMsgId = randId();

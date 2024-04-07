@@ -16,6 +16,7 @@ def serve(config: str):
 
     from server.server import create_server, set_socket_msg_handler, start_server
     from server.socket_msg_handler import SocketMsgHandler
+    from server.message_handler import MessageHandler
     from server.config import load_app_config
     from server.tts_utils import get_torch_device
 
@@ -31,8 +32,9 @@ def serve(config: str):
     tts = TTS(model_name=cfg.tts.model_name, gpu=cfg.tts.use_gpu)
     print(colored("TTS device:", "blue"), get_torch_device(tts))
 
-    handler = lambda ws: SocketMsgHandler(cfg, tts, ws)
-    set_socket_msg_handler(app, handler)
+    msg_handler = MessageHandler(cfg, tts)
+    create_ws_handler = lambda ws, is_unity: SocketMsgHandler(ws, msg_handler, is_unity)
+    set_socket_msg_handler(app, create_ws_handler)
 
     print(colored("Webui:", "green"), f"http://{cfg.server.host}:{cfg.server.port}/ui")
     start_server(app, host=cfg.server.host, port=cfg.server.port)

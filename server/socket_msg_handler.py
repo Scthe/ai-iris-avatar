@@ -1,36 +1,45 @@
 import traceback
 from aiohttp import web
 
-# from TTS.api import TTS
 from termcolor import colored
 from typing import Any
 
-from server.config import AppConfig
-from server.tts_utils import exec_tts, wav2bytes
+from server.message_handler import MessageHandler
 
 
 class SocketMsgHandler:
-    """
-    https://github.com/Scthe/rag-chat-with-context/blob/master/src/socket_msg_handler.py
-    """
-
     def __init__(
         self,
-        cfg: AppConfig,
-        tts: None,  # TTS,
         ws: web.WebSocketResponse,
+        handler: MessageHandler,
+        is_unity: bool,
     ):
-        self.cfg = cfg
         self.ws = ws
-        self.tts = tts
+        self.handler = handler
+        self.is_unity = is_unity
+
+        if self.is_unity:
+            handler.on_text_response.append(self.on_text_response)
+            handler.on_tts_response.append(self.on_tts_response)
+        else:
+            # web browser
+            # TODO add on_query here too. Can happen if unity asked the question.
+            # Web browser should show queries from both itself and unity
+            handler.on_text_response.append(self.on_text_response)
+
+    def on_disconnect(self):
+        # self.handler.on_query.safe_remove(self.on_query)
+        self.handler.on_text_response.safe_remove(self.on_text_response)
+        self.handler.on_tts_response.safe_remove(self.on_tts_response)
 
     async def __call__(self, msg):
-        msg_id = msg.get("msgId", "")
         type = msg.get("type", "")
 
         try:
             if type == "query":
-                await self.ask_question(msg_id, msg)
+                msg_id = msg.get("msgId", "")
+                text = msg.get("text", "")
+                await self.handler.ask_query(text, msg_id=msg_id)
             else:
                 print(
                     colored(f'[Socket error] Unrecognised message: "{type}"', "red"),
@@ -46,40 +55,19 @@ class SocketMsgHandler:
             }
             await self.ws_send_json(data)
 
-    async def ask_question(self, msg_id, msg):
-        q = msg.get("text", "")
-        print(colored(f"Q:", "blue"), q)
-
-        self.tts_and_send_to_client(msg_id, "Hello, this is a sample response")
-
-        """
+    async def on_text_response(self, msg, **kwargs):
+        # TODO add LLM timings
         data = {
             "type": "done",
-            "msgId": msg_id,
-            "text": q,
+            "msgId": kwargs.get("msgId", ""),
+            "text": msg,
         }
-        # print(data)
+        print(data)
         await self.ws_send_json(data)
-        """
 
-    def tts_and_send_to_client(self, msg_id, text):
-        import asyncio
-
-        # TODO https://docs.coqui.ai/en/latest/models/xtts.html#streaming-manually
-        if len(text) <= 0:
-            return
-        # print(colored("voicing:", "green"), tokens)
-
-        async def tts_internal():
-            wav = exec_tts(self.cfg, self.tts, text)
-            bytes = wav2bytes(self.tts, wav)
-
-            # Remember: websockets are on TCP. Always in correct order.
-            await self.ws_send_bytes(bytes)
-
-        loop = asyncio.get_running_loop()
-        # asyncio.run(tts_internal())
-        loop.create_task(tts_internal())
+    async def on_tts_response(self, bytes):
+        print("on_tts_response()")
+        await self.ws_send_bytes(bytes)
 
     async def ws_send_json(self, data: Any):
         await self.ws.send_json((data))

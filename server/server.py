@@ -15,14 +15,23 @@ async def status(_request):
     return web.Response(text="OK")
 
 
+def is_unity_websocket(request):
+    for k, _ in request.raw_headers:
+        if k == b"Cache-Control":
+            return False
+    return True
+
+
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
-    print(colored("Websocket connected", "yellow"))
 
     request.app[websockets].add(ws)
 
-    handler = request.app[socket_msg_handler](ws)
+    is_unity = is_unity_websocket(request)
+    handler = request.app[socket_msg_handler](ws, is_unity)
+    is_unity_str = "unity" if is_unity else "web_browser"
+    print(colored(f"Websocket connected ({is_unity_str})", "yellow"))
 
     try:
         async for msg in ws:
@@ -35,6 +44,7 @@ async def websocket_handler(request):
                 print("ws connection closed with exception %s" % ws.exception())
     finally:
         request.app[websockets].discard(ws)
+        handler.on_disconnect()
     print(colored("Websocket connection closed", "yellow"))
 
     return ws
