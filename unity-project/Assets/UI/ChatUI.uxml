@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/ChatUi.uss?fileID=7433441132597879392&amp;guid=8e7d76d65bdeacc49bd8744187ac4d1d&amp;type=3#ChatUi" />
+    <ui:VisualElement name="BottomContainer" style="flex-grow: 1; position: absolute; bottom: 0; align-self: center; width: 100%; flex-direction: row; align-items: flex-start; justify-content: center; padding-top: 10px; padding-bottom: 10px;">
+        <ui:VisualElement name="ChatWrapper" style="flex-grow: 1; max-width: 60%; height: 100%; background-color: rgba(23, 23, 23, 0.94); border-left-color: rgb(121, 255, 84); border-right-color: rgb(121, 255, 84); border-top-color: rgb(121, 255, 84); border-bottom-color: rgb(121, 255, 84); border-top-left-radius: 17px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; border-bottom-left-radius: 17px; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; flex-direction: column; -unity-font: url(&quot;project://database/Assets/UI/MerriweatherSans-Regular.ttf?fileID=12800000&amp;guid=d91106fb82c510c49a48151637caee39&amp;type=3#MerriweatherSans-Regular&quot;); display: flex;">
+            <ui:VisualElement name="InputMode" style="flex-grow: 1; flex-direction: row; display: flex;">
+                <ui:Label tabindex="-1" text="Ask me a question!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Placeholder" picking-mode="Ignore" style="color: rgb(152, 152, 152); position: absolute; height: 39px; font-size: 20px; top: 5px; left: 13px; display: none;" />
+                <ui:TextField picking-mode="Ignore" multiline="false" name="ChatInput" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); opacity: 1; color: rgb(255, 255, 255); -unity-text-align: middle-left; border-left-color: rgba(255, 0, 0, 0); border-right-color: rgba(255, 0, 0, 0); border-top-color: rgba(255, 0, 0, 0); border-bottom-color: rgba(255, 0, 0, 0); font-size: 20px;" />
+                <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="SendButton" class="activable-button send-button with-transition" style="width: 50px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ReconnectMode" style="flex-grow: 1; flex-direction: row; display: flex; justify-content: center; padding-top: 2px; padding-bottom: 2px;">
+                <ui:Button parse-escape-sequences="false" display-tooltip-when-elided="true" name="ReconnectButton" class="activable-button reconnect-button" style="font-size: 20px; flex-direction: row; justify-content: center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+                    <ui:Label tabindex="-1" text="Try reconnect" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReconnectLabel" picking-mode="Ignore" class="reconnect-button-label with-transition" style="background-color: rgba(0, 0, 0, 0); display: flex; margin-right: 6px;" />
+                    <ui:VisualElement name="ReconnectIcon" picking-mode="Ignore" class="with-transition" style="background-image: url(&quot;project://database/Assets/UI/images/reconnect.png?fileID=2800000&amp;guid=b612876abf3da344babef5e1cf65c4d7&amp;type=3#reconnect&quot;); width: 40px; display: flex;" />
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement name="ConnectingMode" style="flex-grow: 1; flex-direction: row; display: flex; justify-content: center; padding-top: 2px; padding-bottom: 2px;">
+                <ui:Label tabindex="-1" text="Connecting..." parse-escape-sequences="true" display-tooltip-when-elided="true" name="ConnectingLabel" picking-mode="Ignore" style="background-color: rgba(0, 0, 0, 0); color: rgb(255, 255, 255); display: flex; font-size: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

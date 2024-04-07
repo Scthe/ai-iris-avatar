@@ -1,0 +1,48 @@
+.with-transition {
+  transition-duration: 0.2s;
+  transition-property: all;
+  transition-timing-function: ease-in-out;
+}
+
+.activable-button {
+  background-color: rgba(188, 188, 188, 0);
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  cursor: url('project://database/Assets/UI/images/cursor-pointer.png?fileID=2800000&guid=5febe208d33a45249b5894604fe74da1&type=3#cursor-pointer');
+}
+
+.activable-button:hover {
+  -unity-background-image-tint-color: rgb(121, 255, 84);
+}
+
+.send-button {
+  background-image: url('project://database/Assets/UI/images/send.png?fileID=2800000&guid=d1fdc42cfb2302e42a20a7fc7cfd79eb&type=3#send');
+}
+
+TextField {
+  --unity-cursor-color: rgb(180, 180, 180);
+}
+
+TextField > TextInput {
+  background-color: rgba(0, 0, 0, 0);
+  border-width: 0;
+}
+
+.transparentCursor {
+  --unity-cursor-color: rgba(0, 0, 0, 0);
+  cursor: url('project://database/Assets/UI/images/cursor-pointer.png?fileID=2800000&guid=5febe208d33a45249b5894604fe74da1&type=3#cursor-pointer');
+}
+
+.reconnect-button {
+  color: rgb(255, 255, 255);
+}
+
+.reconnect-button:hover {
+  color: rgb(121, 255, 84);
+}
+
+.reconnect-button:hover VisualElement {
+  -unity-background-image-tint-color: rgb(121, 255, 84);
+}
