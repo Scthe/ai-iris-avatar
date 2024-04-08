@@ -45,7 +45,8 @@ def exec_tts(cfg: AppConfig, tts: TTS, text: str):
 
     return wav
 
-async def exec_tts_async(cfg: AppConfig, tts: TTS, text: str,callback):
+
+async def exec_tts_async(cfg: AppConfig, tts: TTS, text: str, callback):
     import asyncio
 
     # TODO https://docs.coqui.ai/en/latest/models/xtts.html#streaming-manually
@@ -64,6 +65,7 @@ async def exec_tts_async(cfg: AppConfig, tts: TTS, text: str,callback):
     # asyncio.run(tts_internal())
     loop.create_task(tts_internal())
 
+
 def exec_tts_to_file(
     cfg: AppConfig, tts: TTS, text: str, out_file_path: str, verbose=False
 ):
@@ -71,7 +73,7 @@ def exec_tts_to_file(
 
     if is_cloning:
         if verbose:
-            speaker = tts_kwargs.get("speaker_wav",'')
+            speaker = tts_kwargs.get("speaker_wav", "")
             print(colored("Cloning voice based on:", "blue"), f"'{speaker}'")
         wav = tts.tts_with_vc_to_file(text=text, file_path=out_file_path, **tts_kwargs)
     else:
@@ -88,3 +90,11 @@ def wav2bytes(tts: TTS, wav):
     out = io.BytesIO()
     tts.synthesizer.save_wav(wav, out)
     return out.getbuffer()
+
+
+def generate_id():
+    import random
+    import string
+
+    length = 8
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))

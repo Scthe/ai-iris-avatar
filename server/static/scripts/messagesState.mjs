@@ -5,9 +5,8 @@ import {
 } from 'https://esm.sh/preact/hooks';
 
 import { randId } from './utils.mjs';
-import { useSocket } from './useSocket.mjs';
+import { useOnSocketMessage } from './useSocket.mjs';
 import {
-  SOCKET_URL,
   SOCKET_STATE,
   MSG_TYPE,
   SYSTEM_MSG_TYPE,
@@ -25,12 +24,17 @@ function messagesReducer(state, action) {
 
   switch (action.action) {
     case 'send': {
+      const { text, respMsgId } = action;
+      const alreadyContains =
+        state.messages.findIndex((msg) => msg.id === respMsgId) !== -1;
+      if (alreadyContains) return state;
+
       return {
         ...state,
         messages: [
+          createMessage(MSG_TYPE.user, undefined, { text }),
+          createMessage(MSG_TYPE.ai, respMsgId, { text: '' }),
           ...state.messages,
-          createMessage(MSG_TYPE.user, undefined, { text: action.text }),
-          createMessage(MSG_TYPE.ai, action.respMsgId, { text: '' }),
         ],
       };
     }
@@ -54,10 +58,11 @@ function messagesReducer(state, action) {
       };
     }
     case 'ai-done': {
-      const { msgId, ...rest } = action;
+      const { msgId, text, ...rest } = action;
       return {
         ...state,
         messages: updateMessage(msgId, (m) => {
+          m.text = text;
           m.meta = { ...(m.meta || {}), ...rest };
         }),
       };
@@ -77,7 +82,7 @@ function messagesReducer(state, action) {
       });
       return {
         ...state,
-        messages: [...state.messages, msg],
+        messages: [msg, ...state.messages],
       };
     }
   }
@@ -105,16 +110,22 @@ function instructionMsg(text) {
   };
 }
 
-export function useMessagesState() {
+export function useMessagesState(socket) {
   const [state, dispatch] = useReducer(messagesReducer, {
     messages: INSTRUCTION_MESSAGES.map(instructionMsg),
   });
 
   // socket to server + message handler
-  const socket = useSocket(SOCKET_URL, (msg) => {
+  useOnSocketMessage(socket, (msg) => {
     const { msgId, type } = msg;
 
     switch (type) {
+      case 'query': {
+        // when e.g. unity client has asked a question
+        const { msgId, text } = msg;
+        dispatch({ action: 'send', text, respMsgId: msgId });
+        break;
+      }
       case 'token': {
         const { token } = msg;
         dispatch({ action: 'ai-token', msgId, token });
@@ -182,8 +193,6 @@ export function useMessagesState() {
 
   return {
     state,
-    socketState: socket.status,
     actionSendMessage,
-    actionReconnect: socket.reconnect,
   };
 }

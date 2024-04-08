@@ -4,10 +4,13 @@ from termcolor import colored
 from server.config import AppConfig
 from server.tts_utils import exec_tts_async
 from server.signal import Signal
+from server.utils import Timer
 
 
 class MessageHandler:
     """
+    Event dispatcher for all messages. A pub/sub.
+
     Based on:
     https://github.com/Scthe/rag-chat-with-context/blob/master/src/socket_msg_handler.py
     """
@@ -23,19 +26,25 @@ class MessageHandler:
         # self.on_text_response_token = Signal(self)  # TODO
         self.on_text_response = Signal()
         self.on_tts_response = Signal()
+        self.on_tts_timings = Signal()
+        self.on_play_vfx = Signal()
 
-    async def ask_query(self, query, **kwargs):
-        print(colored("Query:", "blue"), f"'{query}'", kwargs)
-        await self.on_query.send(query, **kwargs)
+    async def ask_query(self, query: str, msg_id: str):
+        print(colored("Query:", "blue"), f"'{query}' (msg_id={msg_id})")
+        await self.on_query.send(query, msg_id)
 
-        resp_text = "Hello, this is a sample response"
-        await self.on_text_response.send(resp_text, query=query, **kwargs)
+        with Timer() as llm_timer:
+            resp_text = "Hello, this is a sample response"
+        await self.on_text_response.send(resp_text, msg_id, llm_timer.delta)
 
-        if not self.on_tts_response:
-            # TODO send TTS timings: 0
-            return
-        await self.tts(resp_text)
-        # TODO send TTS timings
+        with Timer() as tts_timer:
+            if self.on_tts_response:
+                await self.tts(resp_text)
+        await self.on_tts_timings.send(msg_id, tts_timer.delta)
+
+    async def play_vfx(self, vfx: str):
+        print(colored("VFX (particle system):", "blue"), f"'{vfx}'")
+        await self.on_play_vfx.send(vfx)
 
     async def tts(self, text: str):
         await exec_tts_async(
@@ -46,5 +55,4 @@ class MessageHandler:
         )
 
     async def tts_send(self, bytes):
-        # TODO should we time this and send separate 'ai-tts-elapsed' message?
         await self.on_tts_response.send(bytes)

@@ -8,6 +8,7 @@ html {
 
   background-color: var(--col-bg);
   color: var(--col-white);
+  accent-color: var(--col-accent);
   line-height: 1.2;
   font-size: 18px;
 }
@@ -22,7 +23,10 @@ ul {
   padding: 0;
 }
 
-p {
+p,
+h1,
+h2,
+h3 {
   margin: 0;
   padding: 0;
 }
@@ -31,14 +35,25 @@ p {
   max-width: var(--bk-large);
   margin: 0 auto;
   line-height: 1.5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2em 0 2em;
+  min-height: 100vh;
+}
+
+.chat-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-right: 4em;
+  min-height: 100%;
 }
 
 .message-container-wrapper {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: end;
-  padding: 4em 2em 8em;
+  flex-grow: 1;
+  margin-top: 2em;
 }
 
 .message {
@@ -135,30 +150,6 @@ p {
   & .colored {
     color: var(--col-accent);
   }
-
-  & a,
-  & .toggle-source-btn {
-    color: #4bc2fd;
-    transition: color 0.15s;
-    cursor: pointer;
-  }
-  & a:hover,
-  & .toggle-source-btn:hover {
-    color: #83d6ff;
-  }
-}
-
-.toggle-source-btn {
-  background: transparent;
-  margin-left: 0.2em;
-}
-
-.source-text {
-  margin: 0.5em 0 2em;
-  border-left: 6px solid var(--col-accent);
-  text-align: left;
-  padding-left: 0.5em;
-  color: var(--col-white);
 }
 
 .user-input {
@@ -167,18 +158,13 @@ p {
   --blur-size: 80px;
   --roundness: 20px;
   --max-w: 720px;
-  position: fixed;
-  bottom: 2em;
-  width: var(--max-w);
-  max-width: 100%;
+  width: 100%;
   border: 2px solid rgba(var(--col-accent-v) / 80);
   box-shadow: 0 0 var(--shadow-size)
     rgba(var(--col-accent-v) / var(--shadow-opacity));
   backdrop-filter: blur(var(--blur-size));
   background-color: rgba(--col-bg-v / 80);
   border-radius: var(--roundness);
-  left: 50%;
-  transform: translateX(-50%);
   padding: 0.8em 1.5em;
   transition: box-shadow 0.15s;
 }
@@ -270,4 +256,51 @@ p {
 .awaiting-response {
   text-align: center;
   padding: 5px 0 6px;
+}
+
+.radio-btn {
+  cursor: pointer;
+  transition: color 0.15s;
+  display: block;
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+
+  &:hover {
+    color: rgba(var(--col-accent-v) / 80%);
+  }
+}
+
+.slider {
+  /* https://www.w3schools.com/howto/howto_js_rangeslider.asp */
+  /* <input type="range" min="1" max="100" value="50" class="slider" id="myRange"> */
+  --track-col: #d3d3d3;
+  --knob-size: 25px;
+  --track-h: 15px;
+  -webkit-appearance: none;
+  width: 100%;
+  height: var(--track-h);
+  border-radius: 5px;
+  background: var(--track-col);
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--knob-size);
+    height: var(--knob-size);
+    border-radius: 50%;
+    background: var(--col-accent);
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: var(--knob-size);
+    height: var(--knob-size);
+    border-radius: 50%;
+    background: var(--col-accent);
+    cursor: pointer;
+  }
 }

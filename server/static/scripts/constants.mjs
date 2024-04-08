@@ -35,4 +35,15 @@ export const SYSTEM_MSG_PROPS = {
   intro: { isIntro: true },
 };
 
-export const INSTRUCTION_MESSAGES = ['Welcome to LLM chat with voice-over!'];
+export const INSTRUCTION_MESSAGES = [];
+
+export const AVAILABLE_VFX = [
+  'None',
+  'ColorGradientVFX',
+  'TinyPinkRibbonsVFX',
+  'SnowVFX',
+  'LeafVFX',
+  'PoppingRedCirclesVFX',
+  'RainVFX',
+  'BluePurpleFloatingVFX',
+];

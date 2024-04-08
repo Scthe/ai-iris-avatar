@@ -33,30 +33,3 @@ export function randId() {
     .replace(/[^a-z]+/g, '')
     .substr(2, 10);
 }
-
-export function useIsWindowScrolledToBottomRef() {
-  const resultRef = useRef(isWindowScrolledToBottom());
-
-  useEffect(() => {
-    function scrollHandler() {
-      resultRef.current = isWindowScrolledToBottom();
-    }
-    window.addEventListener('scroll', scrollHandler);
-    return () => {
-      window.removeEventListener('scroll', scrollHandler);
-    };
-  }, []);
-
-  return resultRef;
-}
-
-function isWindowScrolledToBottom(margin = 50) {
-  const scrollPos = window.innerHeight + window.scrollY;
-  const distanceToBottom = document.body.offsetHeight - scrollPos;
-  /*console.log(distanceToBottom, {
-    innerHeight: window.innerHeight,
-    scrollY: window.scrollY,
-    document_body_offsetHeight: document.body.offsetHeight,
-  });*/
-  return distanceToBottom < margin;
-}

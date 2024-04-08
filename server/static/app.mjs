@@ -10,9 +10,12 @@ import {
   SYSTEM_MSG_PROPS,
   INPUT_PLACEHOLDER,
   SECRET_HARDCODED_QUESTION,
+  AVAILABLE_VFX,
+  SOCKET_URL,
 } from './scripts/constants.mjs';
+import { useSocket } from './scripts/useSocket.mjs';
 import { useMessagesState } from './scripts/messagesState.mjs';
-import { cx, useIsWindowScrolledToBottomRef } from './scripts/utils.mjs';
+import { cx } from './scripts/utils.mjs';
 
 // Initialize htm with Preact
 const html = htm.bind(h);
@@ -172,30 +175,57 @@ function UserInput({ actionSendMessage, actionReconnect, socketState }) {
   </div>`;
 }
 
+function ParticleSystemsRow({ name, onChange }) {
+  const attrs = name == AVAILABLE_VFX[0] ? { checked: true } : {};
+  return html`<label class="radio-btn">
+    <input
+      type="radio"
+      id=${name}
+      name="vfx"
+      value=${name}
+      onChange=${onChange}
+      ...${attrs}
+    />${name}
+  </label>`;
+}
+
+function ParticleSystems({ socket }) {
+  const submitVfx = (vfx) => {
+    console.log(`VFX: ${vfx}`);
+    socket.sendMessage({ type: 'play-vfx', vfx });
+  };
+
+  return html`<h2>Play particle system</h2>
+    <div>
+      ${AVAILABLE_VFX.map(
+        (vfx) =>
+          html`<${ParticleSystemsRow}
+            key="${vfx}"
+            name=${vfx}
+            onChange=${() => submitVfx(vfx)}
+          />`
+      )}
+    </div>`;
+}
+
 function App() {
-  const { state, socketState, actionReconnect, actionSendMessage } =
-    useMessagesState();
+  const socket = useSocket(SOCKET_URL);
+
+  const { state, actionSendMessage } = useMessagesState(socket);
   const { messages } = state;
 
-  const isWindowScrolledBtmRef = useIsWindowScrolledToBottomRef();
-
-  useEffect(() => {
-    if (isWindowScrolledBtmRef.current) {
-      window.scrollTo({
-        top: document.body.offsetHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, [messages]);
-
   return html`<main class="app-container">
-    <audio id="audio" controls autoplay hidden></audio>
-    <${MessageContainer} messages=${messages} />
-    <${UserInput}
-      actionSendMessage=${actionSendMessage}
-      actionReconnect=${actionReconnect}
-      socketState=${socketState}
-    />
+    <div class="chat-wrapper">
+      <${UserInput}
+        actionSendMessage=${actionSendMessage}
+        actionReconnect=${socket.reconnect}
+        socketState=${socket.status}
+      />
+      <${MessageContainer} messages=${messages} />
+    </div>
+    <div>
+      <${ParticleSystems} socket=${socket} />
+    </div>
   </main>`;
 }
 

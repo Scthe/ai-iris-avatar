@@ -1,12 +1,17 @@
-import { useCallback, useState, useEffect } from 'https://esm.sh/preact/hooks';
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+} from 'https://esm.sh/preact/hooks';
 
 import { useLatest } from './utils.mjs';
 import { SOCKET_STATE } from './constants.mjs';
 
-export function useSocket(url, onMessage) {
+export function useSocket(url) {
   const [status, setStatus] = useState(SOCKET_STATE.connecting);
-  const [socket, setSocket] = useState(undefined); // TODO [low] handle url change (NOPE!)
-  const onMessageRef = useLatest(onMessage);
+  const [socket, setSocket] = useState(undefined);
+  const onMessageListenersRef = useRef([]);
 
   // util to create new connection
   const reloadSocket = useCallback(() => {
@@ -20,7 +25,7 @@ export function useSocket(url, onMessage) {
     socket.addEventListener('message', async (event) => {
       const msg = JSON.parse(event.data);
       console.log('Socket rcv ', msg);
-      onMessageRef.current?.(msg);
+      onMessageListenersRef.current.forEach((onMessage) => onMessage(msg));
     });
 
     // on disconnect
@@ -60,5 +65,14 @@ export function useSocket(url, onMessage) {
   }, [status, socket]);
 
   // exports
-  return { status, sendMessage, reconnect };
+  return { status, sendMessage, reconnect, onMessageListenersRef };
+}
+
+export function useOnSocketMessage(socket, onMessage) {
+  const onMessageRef = useLatest(onMessage);
+  useEffect(() => {
+    socket.onMessageListenersRef.current.push((...args) => {
+      onMessageRef.current(...args);
+    });
+  }, []);
 }
