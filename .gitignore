@@ -10,3 +10,5 @@ env
 # my
 _references
 voice_to_clone.wav
+out_speak_result.wav
+out_speaker_samples

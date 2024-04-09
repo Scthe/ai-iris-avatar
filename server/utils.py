@@ -40,6 +40,14 @@ class Timer:
         self.stop()
 
 
+def generate_id():
+    import random
+    import string
+
+    length = 8
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
+
 def async_wrap_iter(it):
     """Wrap blocking iterator into an asynchronous one.
     Not used ATM, but it's generally quite usefull in itself.

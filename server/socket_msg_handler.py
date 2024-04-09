@@ -4,37 +4,37 @@ from aiohttp import web
 from termcolor import colored
 from typing import Any
 
-from server.message_handler import MessageHandler
-from server.tts_utils import generate_id
+from server.app_logic import AppLogic
+from server.utils import generate_id
 
 
 class SocketMsgHandler:
     def __init__(
         self,
         ws: web.WebSocketResponse,
-        handler: MessageHandler,
+        app_logic: AppLogic,
         is_unity: bool,
     ):
         self.ws = ws
-        self.handler = handler
+        self.app_logic = app_logic
         self.is_unity = is_unity
 
         if self.is_unity:
-            # handler.on_text_response.append(self.on_text_response)
-            handler.on_tts_response.append(self.on_tts_response)
-            handler.on_play_vfx.append(self.on_play_vfx)
+            # app_logic.on_text_response.append(self.on_text_response)
+            app_logic.on_tts_response.append(self.on_tts_response)
+            app_logic.on_play_vfx.append(self.on_play_vfx)
         else:
             # web browser
-            handler.on_query.append(self.on_query)
-            handler.on_text_response.append(self.on_text_response)
-            handler.on_tts_timings.append(self.on_tts_timinigs)
+            app_logic.on_query.append(self.on_query)
+            app_logic.on_text_response.append(self.on_text_response)
+            app_logic.on_tts_timings.append(self.on_tts_timinigs)
 
     def on_disconnect(self):
-        self.handler.on_query.safe_remove(self.on_query)
-        self.handler.on_text_response.safe_remove(self.on_text_response)
-        self.handler.on_tts_response.safe_remove(self.on_tts_response)
-        self.handler.on_tts_timings.safe_remove(self.on_tts_timinigs)
-        self.handler.on_play_vfx.safe_remove(self.on_play_vfx)
+        self.app_logic.on_query.safe_remove(self.on_query)
+        self.app_logic.on_text_response.safe_remove(self.on_text_response)
+        self.app_logic.on_tts_response.safe_remove(self.on_tts_response)
+        self.app_logic.on_tts_timings.safe_remove(self.on_tts_timinigs)
+        self.app_logic.on_play_vfx.safe_remove(self.on_play_vfx)
 
     async def __call__(self, msg):
         # print(msg)
@@ -44,10 +44,10 @@ class SocketMsgHandler:
             if type == "query":
                 msg_id = msg.get("msgId", generate_id())
                 text = msg.get("text", "")
-                await self.handler.ask_query(text, msg_id)
+                await self.app_logic.ask_query(text, msg_id)
             elif type == "play-vfx":
                 vfx = msg.get("vfx", "")
-                await self.handler.play_vfx(vfx)
+                await self.app_logic.play_vfx(vfx)
             else:
                 print(
                     colored(f'[Socket error] Unrecognised message: "{type}"', "red"),

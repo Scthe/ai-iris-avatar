@@ -8,6 +8,15 @@ def get_torch_device(tts: TTS):
     return next(model.parameters()).device
 
 
+def create_tts(cfg: AppConfig):
+    from TTS.api import TTS
+
+    print(colored("TTS model:", "blue"), cfg.tts.model_name)
+    tts = TTS(model_name=cfg.tts.model_name, gpu=cfg.tts.use_gpu, progress_bar=True)
+    print(colored("TTS device:", "blue"), get_torch_device(tts))
+    return tts
+
+
 def list_speakers(tts: TTS):
     sm = tts.synthesizer.tts_model.speaker_manager
     if sm == None:
@@ -90,11 +99,3 @@ def wav2bytes(tts: TTS, wav):
     out = io.BytesIO()
     tts.synthesizer.save_wav(wav, out)
     return out.getbuffer()
-
-
-def generate_id():
-    import random
-    import string
-
-    length = 8
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))

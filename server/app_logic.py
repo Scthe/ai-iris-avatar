@@ -7,9 +7,10 @@ from server.signal import Signal
 from server.utils import Timer
 
 
-class MessageHandler:
+class AppLogic:
     """
-    Event dispatcher for all messages. A pub/sub.
+    1. Execute all actions. Ask LLM, do the TTS etc.
+    2. Event dispatcher between websockets. A pub/sub.
 
     Based on:
     https://github.com/Scthe/rag-chat-with-context/blob/master/src/socket_msg_handler.py
@@ -38,8 +39,7 @@ class MessageHandler:
         await self.on_text_response.send(resp_text, msg_id, llm_timer.delta)
 
         with Timer() as tts_timer:
-            if self.on_tts_response:
-                await self.tts(resp_text)
+            await self.tts(resp_text)
         await self.on_tts_timings.send(msg_id, tts_timer.delta)
 
     async def play_vfx(self, vfx: str):
@@ -47,12 +47,19 @@ class MessageHandler:
         await self.on_play_vfx.send(vfx)
 
     async def tts(self, text: str):
-        await exec_tts_async(
-            self.cfg,
-            self._tts,
-            text,
-            lambda bytes: self.tts_send(bytes),
-        )
+        # skip if no event listeners
+        if not self.on_tts_response:
+            return
+
+        # split into sentences to lower time to first chunk
+        sentences = self._tts.split_into_sentences(text)
+        for sentence in sentences:
+            await exec_tts_async(
+                self.cfg,
+                self._tts,
+                sentence,
+                lambda bytes: self.tts_send(bytes),
+            )
 
     async def tts_send(self, bytes):
         await self.on_tts_response.send(bytes)

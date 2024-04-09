@@ -19,7 +19,7 @@ class TtsCfg(BaseModel):
     model_name: str = "tts_models/en/ljspeech/tacotron2-DDC"
     # vocoder_name: str = "vocoder_models/en/ljspeech/hifigan_v2"
     use_gpu: StrictBool = True
-    chunk_size: NonNegativeInt = 50
+    chunk_size: NonNegativeInt = 0
     speaker: Optional[str] = None
     language: Optional[str] = None
     sample_of_cloned_voice_wav: Optional[str] = None

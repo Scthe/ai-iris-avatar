@@ -18,14 +18,18 @@ Assets/Oculus
 *.fbx
 *.wav
 *.jpg
+*.svg
+*.prefab
 *.png
 *.tif
 *.exr
 # unity resources
 *.meta
+*.vfx
 *.shadergraph
 *.shadersubgraph
 *.mat
 *.controller
 *.anim
 *.asset
+UIElementsSchema
