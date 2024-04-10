@@ -147,7 +147,7 @@ MonoBehaviour:
       maxPercentage: 100
       minPercentage: 100
       dynResType: 1
-      upsampleFilter: 1
+      upsampleFilter: 4
       forceResolution: 0
       forcedPercentage: 100
       lowResTransparencyMinimumThreshold: 0

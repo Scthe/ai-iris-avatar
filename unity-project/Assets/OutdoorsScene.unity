@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.628931, g: 0.41499758, b: 0.28849694, a: 1}
+  m_IndirectSpecularColor: {r: 0.6287314, g: 0.41488993, b: 0.28839627, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -507,8 +507,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: -876546973899608171, guid: cd2273f7172c5534fad5f0dc0b2ba35c,
-        type: 3}
+      objectReference: {fileID: 2100000, guid: e080d1f8393e8e148b6fdb08615ded77, type: 2}
     - target: {fileID: -3955114208028758273, guid: 177d61d9f3097f54290438104728c1a3,
         type: 3}
       propertyPath: m_BlendShapeWeights.Array.data[0]
@@ -1053,15 +1052,15 @@ MonoBehaviour:
   audioSource: {fileID: 322653655}
   provider: 1
   enableAcceleration: 1
-  enableKeyboardInput: 1
+  enableKeyboardInput: 0
   enableTouchInput: 0
-  audioLoopback: 1
-  loopbackKey: 108
+  audioLoopback: 0
+  loopbackKey: 264
   showVisemes: 0
-  debugVisemesKey: 100
+  debugVisemesKey: 265
   skipAudioSource: 0
   gain: 1
-  debugLaughterKey: 104
+  debugLaughterKey: 263
   showLaughter: 0
   laughterScore: 0
 --- !u!82 &322653655
@@ -1496,7 +1495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialAudioClip: {fileID: 8300000, guid: e21cea670b0f32c428ee862e590a7108, type: 3}
   muteInitial: 1
-  loop: 1
+  loop: 0
   speakerWithLipSync: {fileID: 322653655}
   audioDelay: 60
 --- !u!4 &490378302

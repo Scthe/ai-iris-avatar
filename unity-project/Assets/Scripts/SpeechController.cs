@@ -28,6 +28,8 @@ public class SpeechController : MonoBehaviour
   // [Tooltip("Start audio first. After delay start lipsync animation. Usually not recommended.")]
   // public bool playSoundBeforeLipSync = false;
 
+  private Queue<AudioClip> clipQueue = new Queue<AudioClip>();
+
   void Start()
   {
     // TODO reset clip etc. on the lipsync object
@@ -48,13 +50,36 @@ public class SpeechController : MonoBehaviour
     }
   }
 
+  void Update()
+  {
+    if (!IsSpeaking() && clipQueue.Count > 0)
+    {
+      // Alternative is to use .playscheduled(), but we want to always
+      // start both clips at same time.
+      // https://johnleonardfrench.com/ultimate-guide-to-playscheduled-in-unity/
+      var clip = clipQueue.Dequeue();
+      Speak(clip);
+    }
+  }
+
   public void Speak(AudioClip audioClip)
   {
-    PlayLipSyncAnimation(audioClip);
-    PlaySpeechSound(audioClip);
+    if (IsSpeaking() || clipQueue.Count > 0)
+    {
+      clipQueue.Enqueue(audioClip);
+    }
+    else
+    {
+      PlayLipSyncAnimation(audioClip);
+      PlaySpeechSound(audioClip);
+    }
 
     // copy members just in case
     // StartCoroutine(SpeakCoroutine(audioClip, audioDelay, playSoundBeforeLipSync));
+  }
+  private bool IsSpeaking()
+  {
+    return speakerWithLipSync.isPlaying || GetComponent<AudioSource>().isPlaying;
   }
 
   /*

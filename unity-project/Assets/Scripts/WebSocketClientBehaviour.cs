@@ -113,12 +113,11 @@ public class WebSocketClientBehaviour : MonoBehaviour
 
   public async Task SendQuery(string prompt)
   {
-    prompt = "Who is Michael Jordan?";
     Debug.Log($"Query: '{prompt}'");
 
     var msg = new WsMessageQuery();
     msg.type = "query";
-    msg.text = prompt; // "Michael Jordan is an American collegiate and professional basketball player widely considered to be one of the greatest all-around players in the history of the game. He led the Chicago Bulls to six National Basketball Association (NBA) championships.";
+    msg.text = prompt;
     string json = JsonUtility.ToJson(msg);
     await websocket.SendText(json);
   }

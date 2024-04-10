@@ -1,20 +1,50 @@
+:root {
+  --accent: #6c98ff;
+  --transition-duration: 0.15s;
+  --from-bottom-screen-edge: 5px;
+  --max-w: 60%;
+  --bg: rgba(23, 23, 23, 0.94);
+  --border: rgba(255, 255, 255, 0.05);
+  --radius: 17px;
+  --text-col: rgb(255, 255, 255);
+}
+
 .with-transition {
-  transition-duration: 0.2s;
+  transition-duration: var(--transition-duration);
   transition-property: all;
   transition-timing-function: ease-in-out;
 }
 
 .activable-button {
   background-color: rgba(188, 188, 188, 0);
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: 0;
   cursor: url('project://database/Assets/UI/images/cursor-pointer.png?fileID=2800000&guid=5febe208d33a45249b5894604fe74da1&type=3#cursor-pointer');
 }
 
 .activable-button:hover {
-  -unity-background-image-tint-color: rgb(121, 255, 84);
+  -unity-background-image-tint-color: var(--accent);
+}
+
+.bottom-container {
+  flex-grow: 1;
+  position: absolute;
+  bottom: var(--from-bottom-screen-edge);
+  align-self: center;
+  width: 100%;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.chat-wrapper {
+  flex-grow: 1;
+  max-width: var(--max-w);
+  height: 100%;
+  background-color: var(--bg);
+  border-color: var(--border);
+  border-radius: var(--radius);
+  border-width: 2px;
+  flex-direction: column;
 }
 
 .send-button {
@@ -23,6 +53,14 @@
 
 TextField {
   --unity-cursor-color: rgb(180, 180, 180);
+  font-size: 20px;
+  flex-grow: 1;
+  background-color: transparent;
+  border-color: transparent;
+  opacity: 1;
+  color: var(--text-col);
+  -unity-text-align: middle-left;
+  -unity-background-image-tint-color: rgba(255, 255, 255, 0);
 }
 
 TextField > TextInput {
@@ -30,19 +68,34 @@ TextField > TextInput {
   border-width: 0;
 }
 
+.placeholder {
+  color: rgb(152, 152, 152);
+  position: absolute;
+  height: 39px;
+  font-size: 20px;
+  top: 5px;
+  left: 13px;
+}
+
 .transparentCursor {
+  /* Used for caret blinking */
   --unity-cursor-color: rgba(0, 0, 0, 0);
   cursor: url('project://database/Assets/UI/images/cursor-pointer.png?fileID=2800000&guid=5febe208d33a45249b5894604fe74da1&type=3#cursor-pointer');
 }
 
 .reconnect-button {
-  color: rgb(255, 255, 255);
+  font-size: 20px;
+  flex-direction: row;
+  justify-content: center;
+  color: var(--text-col);
+  margin: 0;
+  padding: 0;
 }
 
 .reconnect-button:hover {
-  color: rgb(121, 255, 84);
+  color: var(--accent);
 }
 
 .reconnect-button:hover VisualElement {
-  -unity-background-image-tint-color: rgb(121, 255, 84);
+  -unity-background-image-tint-color: var(--accent);
 }
