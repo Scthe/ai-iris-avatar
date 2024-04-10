@@ -4,6 +4,7 @@ from xtts_scripts import create_speaker_samples, speak
 inject_path()
 
 from termcolor import colored
+from ollama import AsyncClient
 import click
 
 from server.config import load_app_config
@@ -29,14 +30,16 @@ def serve(config: str):
     cfg = load_app_config(cfg_file)
     print(colored("Config:", "blue"), cfg)
 
-    app = create_server(STATIC_DIR)
-
+    llm = AsyncClient(cfg.llm.api)
     tts = create_tts(cfg)
+    msg_handler = AppLogic(cfg, llm, tts)
 
-    msg_handler = AppLogic(cfg, tts)
+    # create server and set socket handlers
+    app = create_server(STATIC_DIR)
     create_ws_handler = lambda ws, is_unity: SocketMsgHandler(ws, msg_handler, is_unity)
     set_socket_msg_handler(app, create_ws_handler)
 
+    # START!
     print(colored("Webui:", "green"), f"http://{cfg.server.host}:{cfg.server.port}/ui")
     start_server(app, host=cfg.server.host, port=cfg.server.port)
 

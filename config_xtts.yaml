@@ -1,6 +1,13 @@
 llm:
-  # For easier testing
-  enabled: True
+  # If set, disables LLM and returns provided response.
+  # If it's an empty string, the server will return the user's prompt.
+  # Remove this config entry to use LLM.
+  # mocked_response: 'Hello, this is a sample response'
+  # mocked_response: ''
+  # mocked_response: 'Michael Jordan is a renowned American basketball player known for his exceptional skills and captivating performances. He dominated the sport with six NBA championships, setting a record that remains unbroken to this day.'
+
+  # ignored value, just so that 'llm' has some children keys to make it valid yaml
+  dummy_value: 1
 
 tts:
   use_gpu: True

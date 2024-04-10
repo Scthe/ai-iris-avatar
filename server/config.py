@@ -5,7 +5,7 @@ from termcolor import colored
 
 
 class LlmCfg(BaseModel):
-    enabled: StrictBool = True
+    mocked_response: Optional[str] = None
     model: str = "gemma:2b"
     temperature: PositiveFloat = 0.7
     top_k: PositiveInt = 40
