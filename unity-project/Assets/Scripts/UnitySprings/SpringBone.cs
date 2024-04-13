@@ -20,8 +20,6 @@ namespace UnityChan
     [Tooltip("Set to lower than manager's dynamicRatio to activate springs")]
     public float threshold = 0.01f;
 
-    [Tooltip("Draw collision sphere")]
-    public bool debug = true;
 
     [Header("Simulation")]
     //次のボーン
@@ -45,6 +43,8 @@ namespace UnityChan
     public float dragForce = 0.4f;
 
     [Header("Collision")]
+    [Tooltip("Draw collision sphere")]
+    public bool debug = true;
     [Tooltip("Collision radius")]
     public float radius = 0.05f;
     public SpringCollider[] colliders;

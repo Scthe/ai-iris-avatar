@@ -3,7 +3,7 @@
     <ui:VisualElement name="BottomContainer" class="bottom-container">
         <ui:VisualElement name="ChatWrapper" class="chat-wrapper" style="-unity-font: url(&quot;project://database/Assets/UI/MerriweatherSans-Regular.ttf?fileID=12800000&amp;guid=d91106fb82c510c49a48151637caee39&amp;type=3#MerriweatherSans-Regular&quot;); display: flex;">
             <ui:VisualElement name="InputMode" style="flex-grow: 1; flex-direction: row; display: flex;">
-                <ui:Label tabindex="-1" text="Ask me a question!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Placeholder" picking-mode="Ignore" class="placeholder"  style="display: none;" />
+                <ui:Label tabindex="-1" text="Ask me a question!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Placeholder" picking-mode="Ignore" class="placeholder" style="display: none;" />
                 <ui:TextField picking-mode="Ignore" multiline="false" name="ChatInput" />
                 <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="SendButton" class="activable-button send-button with-transition" style="width: 50px;" />
             </ui:VisualElement>

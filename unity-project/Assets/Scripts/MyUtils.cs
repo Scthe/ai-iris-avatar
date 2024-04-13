@@ -31,7 +31,27 @@ public static class MyUtils
     return miliseconds / 1000f;
   }
 
+  /// Timestamp string: HH:mm:ss
+  public static string ts_str()
+  {
+    return System.DateTime.UtcNow.ToString("HH:mm:ss");
+  }
+
   public static bool IsCloseToZero(this Vector3 vec, float sqrEpsilon = 1E-5f)
     => vec.sqrMagnitude < sqrEpsilon;
 
+  public static void SafeSetBlendShapeWeight(
+    SkinnedMeshRenderer skinnedMesh, string blendShapeName, float value
+  )
+  {
+    if (skinnedMesh == null) { return; }
+
+    var mesh = skinnedMesh.sharedMesh;
+    var blendShapeIdx = mesh.GetBlendShapeIndex(blendShapeName);
+
+    if (blendShapeIdx != -1 && blendShapeIdx < mesh.blendShapeCount)
+    {
+      skinnedMesh.SetBlendShapeWeight(blendShapeIdx, value * 100.0f);
+    }
+  }
 }

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using static MyUtils;
 
 /// <summary>
 /// Blinking animation guide: https://www.youtube.com/watch?v=c0DimVO18ps
@@ -19,6 +20,7 @@ public class BlinkController : MonoBehaviour
   [Tooltip("Eyelashes mesh that have 'eyelidsDown' shape key")]
   public SkinnedMeshRenderer eyelashesMesh = null;
 
+  // EYELIDS DOWN
   [Tooltip("Strength of 'eyelids down' shape key when idle")]
   [Range(0.0f, 1.0f)]
   public float IdleEyelidsDown = 0.0f;
@@ -34,18 +36,20 @@ public class BlinkController : MonoBehaviour
 
 
   // EYEBROWS CORNERS DOWN
-  private readonly string SK_BROW_CORNER_UP_L = "BROW-surp.L";
-  private readonly string SK_BROW_CORNER_UP_R = "BROW-surp.R";
   [Tooltip("Strength of 'eyebrows inner corner up' shape key")]
   [Range(0.0f, 1.0f)]
   public float EyebrowsCornerUpStr = 0.05f;
+  private readonly string SK_BROW_CORNER_UP_L = "BROW-surp.L";
+  private readonly string SK_BROW_CORNER_UP_R = "BROW-surp.R";
+
 
   // SQUINTING
-  private readonly string SK_SQUINT_L = "EYE-squint.L";
-  private readonly string SK_SQUINT_R = "EYE-squint.R";
   [Tooltip("Strength of 'eye squint' shape key")]
   [Range(0.0f, 1.0f)]
   public float SquintStr = 0.6f;
+  private readonly string SK_SQUINT_L = "EYE-squint.L";
+  private readonly string SK_SQUINT_R = "EYE-squint.R";
+
 
   // TIMINGS
   [Header("Timings")]
@@ -133,16 +137,5 @@ public class BlinkController : MonoBehaviour
   void ClearBlinkShapeKeys()
   {
     ApplyBlinkShapeKeys(0.0f);
-  }
-
-  void SafeSetBlendShapeWeight(SkinnedMeshRenderer skinnedMesh, string blendShapeName, float value)
-  {
-    var mesh = skinnedMesh.sharedMesh;
-    var blendShapeIdx = mesh.GetBlendShapeIndex(blendShapeName);
-
-    if (blendShapeIdx != -1 && blendShapeIdx < mesh.blendShapeCount)
-    {
-      skinnedMesh.SetBlendShapeWeight(blendShapeIdx, value * 100.0f);
-    }
   }
 }

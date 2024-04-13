@@ -37,9 +37,12 @@ public class WebSocketClientBehaviour : MonoBehaviour
   [Tooltip("Called when received WAV file bytes from websocket.")]
   public UnityEvent<byte[]> onWavBytesReceived;
 
-
   [Tooltip("Handlers for connection state.")]
   public UnityEvent<WebSocketClientBehaviour, WebSocketConnectionState> onConnectionChanged;
+
+  [Tooltip("Handlers for sending new question to the server.")]
+  public UnityEvent<string> onSendQuery;
+
 
   /// https://github.com/endel/NativeWebSocket
   private WebSocket websocket;
@@ -120,6 +123,8 @@ public class WebSocketClientBehaviour : MonoBehaviour
     msg.text = prompt;
     string json = JsonUtility.ToJson(msg);
     await websocket.SendText(json);
+
+    onSendQuery?.Invoke(prompt);
   }
 
   private void SetConnectionState(WebSocketConnectionState s)

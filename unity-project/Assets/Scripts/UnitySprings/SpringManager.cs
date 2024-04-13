@@ -25,11 +25,11 @@ namespace UnityChan
     [Header("Forces")]
     //Ebata
     [Tooltip("Stiffness: additional force along the boneAxis. 1.0 prohibits movement. 0.0 more movement")]
-    public float stiffnessForce;
+    public float stiffnessForce = 0.002f;
     [Tooltip("Stiffness multiplier for each child spring bone. Usually set it to const 1.0")]
     public AnimationCurve stiffnessCurve = AnimationCurve.Constant(0.0f, 1.0f, 1.0f);
     [Tooltip("Drag: limit displacement between consequtive frames (prevTipPos - currTipPos). 1.0 slows movement. 0.0 more movement")]
-    public float dragForce;
+    public float dragForce = 0.001f;
     [Tooltip("Drag multiplier for each child spring bone. Usually set it to const 1.0")]
     public AnimationCurve dragCurve = AnimationCurve.Constant(0.0f, 1.0f, 1.0f);
 
