@@ -191,8 +191,15 @@ export function useMessagesState(socket) {
     [dispatch, socket.sendMessage]
   );
 
+  // exported ctxt reset fn
+  const actionResetContext = useCallback(() => {
+    dispatch({ action: 'system-msg', status: SYSTEM_MSG_TYPE.contextReset });
+    socket.sendMessage({ type: 'reset-context' });
+  }, [dispatch, socket.sendMessage]);
+
   return {
     state,
     actionSendMessage,
+    actionResetContext,
   };
 }

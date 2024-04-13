@@ -6,10 +6,12 @@ from termcolor import colored
 
 class LlmCfg(BaseModel):
     mocked_response: Optional[str] = None
-    model: str = "gemma:2b"
+    model: str = "gemma:2b-instruct"
     temperature: PositiveFloat = 0.7
     top_k: PositiveInt = 40
     top_p: PositiveFloat = 0.9
+    context_length: PositiveInt = 10
+    system_message: Optional[str] = None
     api: str = "http://localhost:11434"
 
 
@@ -39,12 +41,14 @@ class AppConfig(BaseModel):
     server: ServerCfg = ServerCfg()
 
 
-def load_app_config(filepath="config.yaml") -> AppConfig:
+def load_app_config(filepath=None) -> AppConfig:
     """https://github.com/Scthe/rag-chat-with-context/blob/master/src/config.py"""
 
-    print(colored("Loading config file", "blue"), f"'{filepath}'")
-    with open(filepath, "r") as f:
-        yaml_content = load(f.read(), Loader=Loader)
-
-    cfg = AppConfig(**yaml_content)
+    if filepath:
+        print(colored("Loading config file", "blue"), f"'{filepath}'")
+        with open(filepath, "r") as f:
+            yaml_content = load(f.read(), Loader=Loader)
+        cfg = AppConfig(**yaml_content)
+    else:
+        cfg = AppConfig()
     return cfg

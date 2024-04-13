@@ -5,7 +5,6 @@ from termcolor import colored
 from typing import Any
 
 from server.app_logic import AppLogic
-from server.utils import generate_id
 
 
 class SocketMsgHandler:
@@ -42,12 +41,14 @@ class SocketMsgHandler:
 
         try:
             if type == "query":
-                msg_id = msg.get("msgId", generate_id())
+                msg_id = msg.get("msgId", "")
                 text = msg.get("text", "")
                 await self.app_logic.ask_query(text, msg_id)
             elif type == "play-vfx":
                 vfx = msg.get("vfx", "")
                 await self.app_logic.play_vfx(vfx)
+            elif type == "reset-context":
+                self.app_logic.reset_context()
             else:
                 print(
                     colored(f'[Socket error] Unrecognised message: "{type}"', "red"),

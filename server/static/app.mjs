@@ -72,7 +72,12 @@ function MessageContainer({ messages }) {
   </div>`;
 }
 
-function UserInput({ actionSendMessage, actionReconnect, socketState }) {
+function UserInput({
+  actionSendMessage,
+  actionReconnect,
+  actionResetContext,
+  socketState,
+}) {
   const iconSize = '30px';
 
   const sendMessagesRef = useRef([SECRET_HARDCODED_QUESTION]);
@@ -119,6 +124,14 @@ function UserInput({ actionSendMessage, actionReconnect, socketState }) {
     [actionReconnect]
   );
 
+  const onContextReset = useCallback(
+    (e) => {
+      e.preventDefault();
+      actionResetContext();
+    },
+    [actionResetContext]
+  );
+
   if (socketState === SOCKET_STATE.closed) {
     return html`<div class="user-input">
       <button
@@ -139,19 +152,19 @@ function UserInput({ actionSendMessage, actionReconnect, socketState }) {
     </div>`;
   }
 
+  // ResetCtxIcon
   return html`<div class="user-input">
     <form onSubmit=${onMessageSend}>
       <div class="user-input-content">
         <div>
-          <a
-            href=${GITHUB_LINK}
-            title="See the repo on GitHub"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="github-btn reset-focus-states"
+          <button
+            type="button"
+            title="Reset the context"
+            class="user-input-side-btn reset-focus-states"
+            onClick=${onContextReset}
           >
-            <${GitHubIcon} iconSize=${iconSize} />
-          </a>
+            <${ResetCtxIcon} iconSize=${iconSize} />
+          </button>
         </div>
         <input
           id="user-input-field"
@@ -211,20 +224,37 @@ function ParticleSystems({ socket }) {
 function App() {
   const socket = useSocket(SOCKET_URL);
 
-  const { state, actionSendMessage } = useMessagesState(socket);
+  const { state, actionSendMessage, actionResetContext } =
+    useMessagesState(socket);
   const { messages } = state;
 
-  return html`<main class="app-container">
-    <div class="chat-wrapper">
-      <${UserInput}
-        actionSendMessage=${actionSendMessage}
-        actionReconnect=${socket.reconnect}
-        socketState=${socket.status}
-      />
-      <${MessageContainer} messages=${messages} />
+  return html`<main class="app-main">
+    <div class="app-header">
+      <h1>Avatar controller</h1>
+      <a
+        href=${GITHUB_LINK}
+        title="See the repo on GitHub"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="github-btn reset-focus-states"
+      >
+        <${GitHubIcon} iconSize=${'30px'} />
+      </a>
     </div>
-    <div>
-      <${ParticleSystems} socket=${socket} />
+
+    <div class="app-container">
+      <div class="chat-wrapper">
+        <${UserInput}
+          actionSendMessage=${actionSendMessage}
+          actionResetContext=${actionResetContext}
+          actionReconnect=${socket.reconnect}
+          socketState=${socket.status}
+        />
+        <${MessageContainer} messages=${messages} />
+      </div>
+      <div>
+        <${ParticleSystems} socket=${socket} />
+      </div>
     </div>
   </main>`;
 }
@@ -277,5 +307,20 @@ export function GitHubIcon({ iconSize }) {
     <path
       d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
     />
+  </svg>`;
+}
+
+export function ResetCtxIcon({ iconSize }) {
+  return html`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="${iconSize}"
+    height="${iconSize}"
+    fill="currentcolor"
+    viewBox="0 0 256 256"
+    aria-hidden="true"
+  >
+    <path
+      d="M235.5,216.81c-22.56-11-35.5-34.58-35.5-64.8V134.73a15.94,15.94,0,0,0-10.09-14.87L165,110a8,8,0,0,1-4.48-10.34l21.32-53a28,28,0,0,0-16.1-37,28.14,28.14,0,0,0-35.82,16,.61.61,0,0,0,0,.12L108.9,79a8,8,0,0,1-10.37,4.49L73.11,73.14A15.89,15.89,0,0,0,55.74,76.8C34.68,98.45,24,123.75,24,152a111.45,111.45,0,0,0,31.18,77.53A8,8,0,0,0,61,232H232a8,8,0,0,0,3.5-15.19ZM115.11,216a87.53,87.53,0,0,1-24.34-42,8,8,0,0,0-15.49,4,105.16,105.16,0,0,0,18.36,38H64.44A95.54,95.54,0,0,1,40,152a85.9,85.9,0,0,1,7.73-36.29l137.8,55.12c3,18,10.56,33.48,21.89,45.16Z"
+    ></path>
   </svg>`;
 }

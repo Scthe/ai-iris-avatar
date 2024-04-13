@@ -1,30 +1,16 @@
 llm:
-  # If set, disables LLM and returns provided response.
-  # If it's an empty string, the server will return the user's prompt.
-  # Remove this config entry to use LLM.
   # mocked_response: 'Hello, this is a sample response'
   # mocked_response: ''
   # mocked_response: 'Michael Jordan is a renowned American basketball player known for his exceptional skills and captivating performances. He dominated the sport with six NBA championships, setting a record that remains unbroken to this day.'
 
-  # ignored value, just so that 'llm' has some children keys to make it valid yaml
-  dummy_value: 1
+  context_length: 10
+  system_message: >-
+    Answer the question using your general knowledge.
+    If you don't know the answer, just say that you don't know.
+    Use three sentences maximum and keep the answer concise.
 
 tts:
   use_gpu: True
   model_name: 'tts_models/multilingual/multi-dataset/xtts_v2'
-  vocoder_name: 'vocoder_models/en/ljspeech/hifigan_v2'
-  chunk_size: 0
-
-  # Required for multispeaker models (like xtts_v2)
-  # Call `make xtts-list-speakers` to get speakers.
-  # Then pick one at random.
-  #
-  # Or `xtts-create-speaker-samples` to generate samples
-  # so you can manually pick pick best one.
   speaker: 'Rosemary Okafor'
-
-  # Required in multilingual models (like xtts_v2)
   language: 'en'
-
-  # Optional file that contains voice we will be cloning
-  # sample_of_cloned_voice_wav: 'voice_to_clone.wav'

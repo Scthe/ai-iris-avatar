@@ -1,4 +1,4 @@
-export const GITHUB_LINK = 'https://github.com/Scthe/ai-chat-with-tts';
+export const GITHUB_LINK = 'https://github.com/Scthe/avatar-ai-chat';
 
 /** 'ws://localhost:8080/ws' */
 export const SOCKET_URL = `ws://${location.host}/`;

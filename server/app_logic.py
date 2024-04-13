@@ -1,24 +1,52 @@
 from TTS.api import TTS
 from termcolor import colored
 from ollama import AsyncClient as OllamaAsyncClient
+from typing import Optional
 import asyncio
 
 from server.config import AppConfig
 from server.tts_utils import exec_tts, wav2bytes
 from server.signal import Signal
-from server.utils import Timer
+from server.utils import Timer, generate_id
 
 
-def wrap_prompt_gemma2b(text, **kwargs):
-    GEMMA_TEMPLATE = """<start_of_turn>user
-    Answer the question.
-    If you don't know the answer, just say that you don't know.
-    Use three sentences maximum and keep the answer concise.
-    
-    Question: {text}<end_of_turn>
-    <start_of_turn>model"""
+class GemmaChatContext:
+    """https://ai.google.dev/gemma/docs/pytorch_gemma"""
 
-    return GEMMA_TEMPLATE.format(text=text, **kwargs)
+    USER_CHAT_TEMPLATE = "<start_of_turn>user\n{prompt}<end_of_turn>\n"
+    MODEL_CHAT_TEMPLATE = "<start_of_turn>model\n{prompt}<end_of_turn>\n"
+
+    def __init__(self, cfg: AppConfig):
+        self.cfg = cfg
+        self.history = []
+
+    def add_user_query(self, query):
+        self.history.append(GemmaChatContext.USER_CHAT_TEMPLATE.format(prompt=query))
+
+    def add_model_response(self, resp):
+        self.history.append(GemmaChatContext.MODEL_CHAT_TEMPLATE.format(prompt=resp))
+
+    def reset(self):
+        self.history = []
+
+    def generate_prompt(self):
+        ctx_len = self.cfg.llm.context_length
+        if ctx_len > 0:
+            self.history = self.history[-ctx_len * 2 :]
+        else:
+            self.history = []
+        context = "".join(self.history)
+
+        system_message = self.cfg.llm.system_message
+        system_message = system_message if isinstance(system_message, str) else ""
+        system_message = system_message.strip()
+        sys_prompt = ""
+        if len(system_message) > 0:
+            sys_prompt = GemmaChatContext.USER_CHAT_TEMPLATE.format(
+                prompt=system_message
+            )
+
+        return sys_prompt + context + "<start_of_turn>model\n"
 
 
 class AppLogic:
@@ -39,6 +67,7 @@ class AppLogic:
         self.cfg = cfg
         self.llm = llm
         self._tts = tts
+        self.chat_context = GemmaChatContext(cfg)
 
         self.on_query = Signal()
         self.on_text_response = Signal()
@@ -46,19 +75,28 @@ class AppLogic:
         self.on_tts_timings = Signal()
         self.on_play_vfx = Signal()
 
-    async def ask_query(self, query: str, msg_id: str):
+    async def ask_query(self, query: str, msg_id: Optional[str] = ""):
+        if not msg_id:
+            msg_id = generate_id()
         print(colored("Query:", "blue"), f"'{query}' (msg_id={msg_id})")
         await self.on_query.send(query, msg_id)
+        self.chat_context.add_user_query(query)
 
         with Timer() as llm_timer:
             resp_text = await self._exec_llm(query)
+            self.chat_context.add_model_response(resp_text)
         await self.on_text_response.send(resp_text, msg_id, llm_timer.delta)
 
         await self._exec_tts(resp_text, msg_id)  # internally can use different thread
 
+        return resp_text
+
     async def play_vfx(self, vfx: str):
         print(colored("VFX (particle system):", "blue"), f"'{vfx}'")
         await self.on_play_vfx.send(vfx)
+
+    def reset_context(self):
+        self.chat_context.reset()
 
     async def _exec_llm(self, query: str):
         """If this fn returns nothing, just restart ollama"""
@@ -71,8 +109,9 @@ class AppLogic:
             )
             return query if cfg.mocked_response == "" else cfg.mocked_response
 
-        # TODO self.llm.chat
-        prompt = wrap_prompt_gemma2b(query)
+        prompt = self.chat_context.generate_prompt()
+        # print(colored(prompt, "yellow"))
+
         # https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion
         resp = await self.llm.generate(
             model=cfg.model,

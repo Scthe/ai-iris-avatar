@@ -31,22 +31,33 @@ h3 {
   padding: 0;
 }
 
+.app-main {
+}
+
+.app-header {
+  margin-top: 1em;
+  text-align: center;
+
+  & > h1 {
+    display: inline-block;
+    margin-right: 0.5em;
+  }
+}
+
 .app-container {
   max-width: var(--bk-large);
   margin: 0 auto;
   line-height: 1.5;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 2em 0 2em;
-  min-height: 100vh;
+  padding: 1em 0 2em;
+  gap: 4em;
 }
 
 .chat-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-right: 4em;
-  min-height: 100%;
 }
 
 .message-container-wrapper {
@@ -65,11 +76,11 @@ h3 {
 
 .message-user {
   color: var(--col-accent);
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 .message-system {
-  margin-bottom: 3.5em;
+  margin-bottom: 1.5em;
   position: relative;
 
   & .message-text {

@@ -1,0 +1,45 @@
+llm:
+  # if disabled, it will just read out the question
+  enabled: True
+  # LLM ollama model
+  # https://ollama.com/library/gemma
+  model: 'gemma:2b-instruct'
+  # The temperature of the model. Increasing the temperature will make the model answer more creatively.
+  temperature: 0.7
+  # Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative.
+  top_k: 40
+  # Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text, while a lower value (e.g., 0.5) will generate more focused and conservative text.
+  top_p: 0.9
+  api: 'http://localhost:11434'
+  # If set, disables LLM and returns provided response.
+  # If it's an empty string, the server will return the user's prompt.
+  # Remove this config entry to use LLM.
+  mocked_response: 'Hello, this is a sample response'
+  # How many question-response pairs to remember?
+  # Too high, and the LLM will not deviate from topics.
+  # Too low and the conversation will be 'random'.
+  context_length: 10
+  # Message added before each user question
+  system_message: >-
+    Answer the question using your general knowledge.
+    If you don't know the answer, just say that you don't know.
+    Use three sentences maximum and keep the answer concise.
+
+tts:
+  use_gpu: False
+  model_name: 'tts_models/en/ljspeech/tacotron2-DDC'
+  # Required for multispeaker models (like xtts_v2)
+  # Call `make xtts-list-speakers` to get speakers list.
+  # Or call `make xtts-create-speaker-samples` to generate samples
+  # so you can manually pick pick best one.
+  speaker: 'Rosemary Okafor'
+
+  # Required in multilingual models (like xtts_v2)
+  language: 'en'
+
+  # Optional file that contains voice we will be cloning
+  # sample_of_cloned_voice_wav: 'voice_to_clone.wav'
+
+server:
+  host: 'localhost'
+  port: 8080

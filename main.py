@@ -19,25 +19,22 @@ def serve(config: str):
     """Start the server for TTS service"""
     # https://github.com/Scthe/rag-chat-with-context/blob/master/main.py#L175
 
-    from server.server import create_server, set_socket_msg_handler, start_server
+    from server.server import create_server, start_server
     from server.socket_msg_handler import SocketMsgHandler
     from server.app_logic import AppLogic
 
     STATIC_DIR = "./server/static"
-    DEFAULT_CONFIG_FILE = "config.yaml"
 
-    cfg_file = config if config else DEFAULT_CONFIG_FILE
-    cfg = load_app_config(cfg_file)
+    cfg = load_app_config(config)
     print(colored("Config:", "blue"), cfg)
 
     llm = AsyncClient(cfg.llm.api)
     tts = create_tts(cfg)
-    msg_handler = AppLogic(cfg, llm, tts)
+    app_logic = AppLogic(cfg, llm, tts)
 
     # create server and set socket handlers
-    app = create_server(STATIC_DIR)
-    create_ws_handler = lambda ws, is_unity: SocketMsgHandler(ws, msg_handler, is_unity)
-    set_socket_msg_handler(app, create_ws_handler)
+    create_ws_handler = lambda ws, is_unity: SocketMsgHandler(ws, app_logic, is_unity)
+    app = create_server(STATIC_DIR, create_ws_handler, app_logic)
 
     # START!
     print(colored("Webui:", "green"), f"http://{cfg.server.host}:{cfg.server.port}/ui")
