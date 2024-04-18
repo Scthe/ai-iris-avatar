@@ -1,4 +1,10 @@
 def inject_path():
+    """
+    Called before anything else. You can use this function to e.g.
+    add to the path additional source files. PyTorch with CUDA
+    is 2.7+ GB, and you probably already have one installed.
+    I don't want to waste your disk space.
+    """
     import sys
 
     # your paths here

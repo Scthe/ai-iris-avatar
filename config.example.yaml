@@ -1,6 +1,8 @@
 llm:
-  # if disabled, it will just read out the question
-  enabled: True
+  # If set, disables LLM and returns provided response.
+  # If it's an empty string, the server will return the user's prompt.
+  # Remove this config entry to use LLM.
+  mocked_response: 'Hello, this is a sample response'
   # LLM ollama model
   # https://ollama.com/library/gemma
   model: 'gemma:2b-instruct'
@@ -11,10 +13,6 @@ llm:
   # Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text, while a lower value (e.g., 0.5) will generate more focused and conservative text.
   top_p: 0.9
   api: 'http://localhost:11434'
-  # If set, disables LLM and returns provided response.
-  # If it's an empty string, the server will return the user's prompt.
-  # Remove this config entry to use LLM.
-  mocked_response: 'Hello, this is a sample response'
   # How many question-response pairs to remember?
   # Too high, and the LLM will not deviate from topics.
   # Too low and the conversation will be 'random'.

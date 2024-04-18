@@ -11,15 +11,31 @@ using System.Collections;
 
 namespace UnityChan
 {
+  // mm: pos: [0, -0.000283, 0.000748]
   public class SpringCollider : MonoBehaviour
   {
     //半径
-    public float radius = 0.5f;
+    public float radius = 0.045f;
+    [Tooltip("Draw collision sphere")]
+    public bool debug = false;
 
     private void OnDrawGizmosSelected()
     {
-      Gizmos.color = Color.green;
-      Gizmos.DrawWireSphere(transform.position, radius);
+      if (debug)
+      {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, radius);
+      }
+    }
+
+    private void OnDrawGizmos()
+    {
+      if (debug)
+      {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, radius);
+      }
     }
   }
+
 }

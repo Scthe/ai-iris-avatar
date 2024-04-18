@@ -44,7 +44,7 @@ namespace UnityChan
 
     [Header("Collision")]
     [Tooltip("Draw collision sphere")]
-    public bool debug = true;
+    public bool debug = false;
     [Tooltip("Collision radius")]
     public float radius = 0.05f;
     public SpringCollider[] colliders;

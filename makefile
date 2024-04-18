@@ -15,13 +15,14 @@ serve:
 serve-simple:
 	python.exe main.py serve
 
+
 # ------------- CURL PROMPT:
 curl_prompt_get:
 	curl "http://localhost:8080/prompt?value=Who%20is%20Michael%20Jordan%3F"
 
 curl_prompt_post:
 	curl --request POST --header "Content-Type: application/json" --data "{\"value\":\"Who is Michael Jordan?\"}" "http://localhost:8080/prompt"
-  
+
 
 # ------------- TTS UTILS:
 tts-list-models:

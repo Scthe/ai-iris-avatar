@@ -284,8 +284,8 @@ MonoBehaviour:
   m_LinkShadowLayers: 1
   m_ShadowNearPlane: 0.1
   m_BlockerSampleCount: 24
-  m_FilterSampleCount: 18
-  m_MinFilterSize: 0.1
+  m_FilterSampleCount: 26
+  m_MinFilterSize: 0.19
   m_KernelSize: 5
   m_LightAngle: 1
   m_MaxDepthBias: 0.001
@@ -293,7 +293,7 @@ MonoBehaviour:
     m_Override: 512
     m_UseOverride: 0
     m_Level: 3
-  m_ShadowDimmer: 1
+  m_ShadowDimmer: 0.97
   m_VolumetricShadowDimmer: 1
   m_ShadowFadeDistance: 10000
   m_UseContactShadow:
@@ -1045,7 +1045,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 44a9f5e79aa105143b9c85da9e9b7872, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2226276481182961150, guid: 177d61d9f3097f54290438104728c1a3,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1129585382}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 177d61d9f3097f54290438104728c1a3,
         type: 3}
@@ -1152,8 +1156,9 @@ MonoBehaviour:
   stiffnessForce: 0.01
   dragForce: 0.4
   debug: 0
-  radius: 0.05
-  colliders: []
+  radius: 0.02
+  colliders:
+  - {fileID: 1129585383}
 --- !u!114 &307341622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1196,8 +1201,9 @@ MonoBehaviour:
   stiffnessForce: 0.01
   dragForce: 0.4
   debug: 0
-  radius: 0.05
-  colliders: []
+  radius: 0.02
+  colliders:
+  - {fileID: 1129585383}
 --- !u!1 &322653650 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7898157854373911656, guid: 177d61d9f3097f54290438104728c1a3,
@@ -1459,6 +1465,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 506237394}
   m_LocalEulerAnglesHint: {x: -89.98, y: 0, z: 0}
+--- !u!4 &356985937 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2226276481182961150, guid: 177d61d9f3097f54290438104728c1a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 307341614}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &408080376
 GameObject:
   m_ObjectHideFlags: 0
@@ -3461,6 +3473,52 @@ VisualEffect:
       m_Array: []
     m_Bool:
       m_Array: []
+--- !u!1 &1129585381
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1129585382}
+  - component: {fileID: 1129585383}
+  m_Layer: 0
+  m_Name: HairColliderJaw
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1129585382
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1129585381}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.000283, z: 0.000748}
+  m_LocalScale: {x: 0.009999998, y: 0.01, z: 0.009999997}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 356985937}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1129585383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1129585381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 183732bc5a10c2644b49e3731151a50f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 0.045
+  debug: 0
 --- !u!1 &1229744240
 GameObject:
   m_ObjectHideFlags: 0
@@ -3985,10 +4043,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftEyeBone: {fileID: 2099998094}
   rightEyeBone: {fileID: 1904552156}
-  updateInterval: 0.01
-  minDeltaAngle: 0.1
-  target: {fileID: 2026954504}
+  updateInterval: 0.3
+  minDeltaAngle: 1.1
   debug: 0
+  target: {fileID: 2026954504}
+  angleUp: 10
+  angleDown: 22
+  angleInside: 10
+  angleOutside: -23
 --- !u!4 &1481266176
 Transform:
   m_ObjectHideFlags: 0
@@ -4310,7 +4372,13 @@ VisualEffect:
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
-      m_Array: []
+      m_Array:
+      - m_Value: 0.1
+        m_Name: bounceSize
+        m_Overridden: 1
+      - m_Value: 0.005
+        m_Name: trailSize
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -4418,7 +4486,7 @@ Transform:
   m_GameObject: {fileID: 1823688464}
   serializedVersion: 2
   m_LocalRotation: {x: 0.020525701, y: -0.055480137, z: -0.0018695409, w: 0.998247}
-  m_LocalPosition: {x: 0.097, y: 1.763, z: 2.262}
+  m_LocalPosition: {x: 0.097, y: 1.7874, z: 2.263}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4829,7 +4897,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2026954503}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.020525701, y: 0.055480137, z: 0.0018695409, w: 0.998247}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.014, y: -0.106, z: -0.127}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4881,6 +4949,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetFrameRate: 30
+  showDuringRuntime: 0
 --- !u!1 &2052366594
 GameObject:
   m_ObjectHideFlags: 0
@@ -5077,7 +5146,7 @@ MonoBehaviour:
   m_ShadowNearPlane: 0.1
   m_BlockerSampleCount: 24
   m_FilterSampleCount: 16
-  m_MinFilterSize: 0.1
+  m_MinFilterSize: 0.7
   m_KernelSize: 5
   m_LightAngle: 1
   m_MaxDepthBias: 0.001
@@ -5095,8 +5164,8 @@ MonoBehaviour:
   m_RayTracedContactShadow: 0
   m_ShadowTint: {r: 0, g: 0, b: 0, a: 1}
   m_PenumbraTint: 0
-  m_NormalBias: 2.37
-  m_SlopeBias: 0.737
+  m_NormalBias: 4
+  m_SlopeBias: 0.79
   m_ShadowUpdateMode: 0
   m_AlwaysDrawDynamicShadows: 0
   m_UpdateShadowOnLightMovement: 0

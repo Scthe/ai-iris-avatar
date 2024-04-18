@@ -89,7 +89,6 @@ public class SpeechController : MonoBehaviour
 
   void Start()
   {
-    // TODO reset clip etc. on the lipsync object
     speakerWithLipSync.mute = true;
     speakerWithLipSync.playOnAwake = false;
     speakerWithLipSync.loop = loop;
