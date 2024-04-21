@@ -81,9 +81,11 @@ public class EyesFollowCameraController : MonoBehaviour
       // This assumes that by default the character looks at the target. Fine for this simple demo.
       leftEyeBone.LookAt(target - leftToRightVector / 2f);
       rightEyeBone.LookAt(target + leftToRightVector / 2f);
+      // average up/down rotation. Useful when head is not horizontal (one eye higher than other)
+      float XRotation = (leftEyeBone.localEulerAngles[0] + rightEyeBone.localEulerAngles[0]) / 2f;
 
       // constraints
-      var XRotation = ApplyConstraintLocalRot_UpDown(leftEyeBone);
+      XRotation = ApplyConstraintLocalRot_UpDown(XRotation);
       // Debug.Log($"rot: {leftEyeBone.localEulerAngles}, XRotation={XRotation}");
       // Debug.Log($"rot: {rightEyeBone.localEulerAngles}, XRotation={XRotation}");
       var YRotationL = ApplyConstraintLocalRot_SidesL();
@@ -116,10 +118,10 @@ public class EyesFollowCameraController : MonoBehaviour
     // Debug.Log($"OK ANGLE: {angleCos}dgr");
   }
 
-  private float ApplyConstraintLocalRot_UpDown(Transform tfxBone)
+  private float ApplyConstraintLocalRot_UpDown(float angle)
   {
     return Mathf.Clamp(
-       FixAngle(tfxBone.localEulerAngles[0]),
+       FixAngle(angle),
        Mathf.Min(angleUp, angleDown),
        Mathf.Max(angleUp, angleDown)
      );

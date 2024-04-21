@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/ChatUi.uss?fileID=7433441132597879392&amp;guid=8e7d76d65bdeacc49bd8744187ac4d1d&amp;type=3#ChatUi" />
     <ui:VisualElement name="BottomContainer" class="bottom-container">
-        <ui:VisualElement name="ChatWrapper" class="chat-wrapper" style="-unity-font: url(&quot;project://database/Assets/UI/MerriweatherSans-Regular.ttf?fileID=12800000&amp;guid=d91106fb82c510c49a48151637caee39&amp;type=3#MerriweatherSans-Regular&quot;); display: flex;">
+        <ui:VisualElement name="ChatWrapper" class="chat-wrapper with-transition" style="-unity-font: url(&quot;project://database/Assets/UI/MerriweatherSans-Regular.ttf?fileID=12800000&amp;guid=d91106fb82c510c49a48151637caee39&amp;type=3#MerriweatherSans-Regular&quot;); display: flex;">
             <ui:VisualElement name="InputMode" style="flex-grow: 1; flex-direction: row; display: flex;">
                 <ui:Label tabindex="-1" text="Ask me a question!" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Placeholder" picking-mode="Ignore" class="placeholder" style="display: none;" />
                 <ui:TextField picking-mode="Ignore" multiline="false" name="ChatInput" />
@@ -9,7 +9,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="ReconnectMode" style="flex-grow: 1; flex-direction: row; display: flex; justify-content: center; padding-top: 2px; padding-bottom: 2px;">
                 <ui:Button parse-escape-sequences="false" display-tooltip-when-elided="true" name="ReconnectButton" class="activable-button reconnect-button">
-                    <ui:Label tabindex="-1" text="Try reconnect" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReconnectLabel" picking-mode="Ignore" class="reconnect-button-label with-transition" style="background-color: rgba(0, 0, 0, 0); display: flex; margin-right: 6px;" />
+                    <ui:Label tabindex="-1" text="Reconnect" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReconnectLabel" picking-mode="Ignore" class="reconnect-button-label with-transition" style="background-color: rgba(0, 0, 0, 0); display: flex; margin-right: 6px;" />
                     <ui:VisualElement name="ReconnectIcon" picking-mode="Ignore" class="with-transition" style="background-image: url(&quot;project://database/Assets/UI/images/reconnect.png?fileID=2800000&amp;guid=b612876abf3da344babef5e1cf65c4d7&amp;type=3#reconnect&quot;); width: 40px; display: flex;" />
                 </ui:Button>
             </ui:VisualElement>

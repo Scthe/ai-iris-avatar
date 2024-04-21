@@ -41,8 +41,10 @@ public static class MyUtils
     => vec.sqrMagnitude < sqrEpsilon;
 
   public static void SafeSetBlendShapeWeight(
-    SkinnedMeshRenderer skinnedMesh, string blendShapeName, float value
-  )
+    SkinnedMeshRenderer skinnedMesh,
+    string blendShapeName,
+    float value
+    )
   {
     if (skinnedMesh == null) { return; }
 
@@ -52,6 +54,18 @@ public static class MyUtils
     if (blendShapeIdx != -1 && blendShapeIdx < mesh.blendShapeCount)
     {
       skinnedMesh.SetBlendShapeWeight(blendShapeIdx, value * 100.0f);
+    }
+  }
+
+  public static bool IsDebugRelease
+  {
+    get
+    {
+#if DEBUG
+      return true;
+#else
+      return false;
+#endif
     }
   }
 }

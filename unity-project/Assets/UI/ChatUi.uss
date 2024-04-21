@@ -1,12 +1,14 @@
 :root {
-  --accent: #6c98ff;
+  --accent: rgb(108, 152, 255);
   --transition-duration: 0.15s;
   --from-bottom-screen-edge: 5px;
   --max-w: 60%;
-  --bg: rgba(23, 23, 23, 0.94);
+  --bg: rgba(23, 23, 23, 0.85);
+  --bg-focused: rgba(23, 23, 23, 0.94);
   --border: rgba(255, 255, 255, 0.05);
   --radius: 17px;
   --text-col: rgb(255, 255, 255);
+  --cursor-color: rgb(235, 235, 235);
 }
 
 .with-transition {
@@ -45,6 +47,12 @@
   border-radius: var(--radius);
   border-width: 2px;
   flex-direction: column;
+  transition-property: border-color, background-color;
+}
+
+.chat-wrapper-focused {
+  border-color: var(--accent);
+  background-color: var(--bg-focused);
 }
 
 .send-button {
@@ -52,7 +60,7 @@
 }
 
 TextField {
-  --unity-cursor-color: rgb(180, 180, 180);
+  --unity-cursor-color: var(--cursor-color);
   font-size: 20px;
   flex-grow: 1;
   background-color: transparent;
@@ -78,7 +86,6 @@ TextField > TextInput {
 }
 
 .transparentCursor {
-  /* Used for caret blinking */
   --unity-cursor-color: rgba(0, 0, 0, 0);
   cursor: url('project://database/Assets/UI/images/cursor-pointer.png?fileID=2800000&guid=5febe208d33a45249b5894604fe74da1&type=3#cursor-pointer');
 }

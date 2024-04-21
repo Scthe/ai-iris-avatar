@@ -41,7 +41,7 @@ public class AnimLoopRandomStateMachine : StateMachineBehaviour
   // OnStateMachineEnter is called when entering a state machine via its Entry Node
   override public void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
   {
-    Debug.Log($"OnStateMachineEnter: {blendVariableName}");
+    // Debug.Log($"OnStateMachineEnter: {blendVariableName}");
     PlayNextRandomAnim(animator);
   }
 
@@ -56,6 +56,7 @@ public class AnimLoopRandomStateMachine : StateMachineBehaviour
   private void PlayNextRandomAnim(Animator animator)
   {
     int currAnim = Random.Range(0, animCount);
+    // int currAnim = 1; // mock. 1 is the 'swaying' one, that had eyes problem
     if (debugLogChanges)
     {
       Debug.Log($"Anim {blendVariableName}: {currAnim}");

@@ -19,7 +19,7 @@ public class UIController : MonoBehaviour
 
   private static readonly int CURSOR_BLINK_FREQ = 1000;
 
-  // private VisualElement wrapper;
+  private VisualElement chatWrapperEl;
   private VisualElement modeInputEl;
   private VisualElement modeReconnectEl;
   private VisualElement modeConnectingEl;
@@ -32,7 +32,7 @@ public class UIController : MonoBehaviour
   void Start()
   {
     var root = GetComponent<UIDocument>().rootVisualElement;
-    // wrapper = root.Q<VisualElement>("BottomContainer");
+    chatWrapperEl = root.Q<VisualElement>("ChatWrapper");
     modeInputEl = root.Q<VisualElement>("InputMode");
     modeReconnectEl = root.Q<VisualElement>("ReconnectMode");
     modeConnectingEl = root.Q<VisualElement>("ConnectingMode");
@@ -46,6 +46,18 @@ public class UIController : MonoBehaviour
     textInputEl.RegisterCallback<ChangeEvent<string>>(OnTextInputChanged);
     textInputEl.RegisterCallback<KeyDownEvent>(OnTextInputKeyDown);
     reconnectBtnEl.RegisterCallback<ClickEvent>(OnReconnectBtnClick);
+
+    // focus colors
+    textInputEl.RegisterCallback<FocusInEvent>(e =>
+    {
+      // Debug.Log("Focus in");
+      SetChatWrapperFocused(true);
+    });
+    textInputEl.RegisterCallback<FocusOutEvent>(e =>
+    {
+      // Debug.Log("Focus out");
+      SetChatWrapperFocused(false);
+    });
 
     SetTextInputValue("");
     BlinkingCursor(textInputEl);
@@ -89,7 +101,7 @@ public class UIController : MonoBehaviour
   private void SetTextInputValue(string value)
   {
     textInputEl.value = value;
-    UpdatePlaceholder(value);
+    // UpdatePlaceholder(value);
   }
 
   private void ApplyPanelMode(PanelDisplayMode mode)
@@ -121,6 +133,8 @@ public class UIController : MonoBehaviour
           break;
         }
     }
+
+    SetChatWrapperFocused(false);
   }
 
   // -------------------------------
@@ -139,7 +153,7 @@ public class UIController : MonoBehaviour
 
   private void OnTextInputChanged(ChangeEvent<string> e)
   {
-    UpdatePlaceholder(e.newValue);
+    // UpdatePlaceholder(e.newValue);
   }
 
   private void OnTextInputKeyDown(KeyDownEvent e)
@@ -149,6 +163,22 @@ public class UIController : MonoBehaviour
     if (e.keyCode == KeyCode.Return)
     {
       sendQueryToServer();
+    }
+  }
+
+  private void SetChatWrapperFocused(bool focused)
+  {
+    var className = "chat-wrapper-focused";
+    if (focused)
+    {
+      chatWrapperEl.AddToClassList(className);
+      // chatWrapperEl.style.backgroundColor = Color.red;
+      UpdatePlaceholder("hidden"); // hide placeholder
+    }
+    else
+    {
+      chatWrapperEl.RemoveFromClassList(className);
+      UpdatePlaceholder(""); // show placeholder
     }
   }
 
