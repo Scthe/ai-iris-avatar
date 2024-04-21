@@ -1,8 +1,25 @@
-/Library
-/Logs
-/Recordings
-/Temp
-/UserSettings
+# This .gitignore file should be placed at the root of your Unity project directory
+#
+# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
+#
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can get excessive in size.
+# They also could contain extremely sensitive data
+/[Mm]emoryCaptures/
+
+# Recordings can get excessive in size
+/[Rr]ecordings/
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
 /*.blob
 
 /Plugin/.build
@@ -11,25 +28,52 @@
 *.csproj
 *.sln
 
-# my
-Packages/com.unity.render-pipelines.high-definition-config
-Assets/Oculus
-# raw resources
-*.fbx
-*.wav
-*.jpg
-*.svg
-*.prefab
-*.png
-*.tif
-*.exr
-# unity resources
-*.meta
-*.vfx
-*.shadergraph
-*.shadersubgraph
-*.mat
-*.controller
-*.anim
-*.asset
+#########################################################
+### My custom lines below
+#########################################################
+
+# https://forum.unity.com/threads/uielementsschema.954252/
 UIElementsSchema
+
+# Temporary
+# Assets/Oculus
+# raw resources
+# *.fbx
+# *.wav
+# *.jpg
+# *.svg
+# *.prefab
+# *.png
+# *.tif
+# *.exr
+# unity resources
+# *.meta
+# *.vfx
+# *.shadergraph
+# *.shadersubgraph
+# *.mat
+# *.controller
+# *.anim
+# *.asset
+# UIElementsSchema
+
+
+#########
+# Probably OK if this stays for release
+Assets/Oculus/LipSync/Audio
+Assets/Oculus/LipSync/Scenes
+Assets/UI/images/icons.svg
+Assets/UI/images/icons.svg.meta
+
+#########
+Packages/com.unity.render-pipelines.high-definition-config
+
+#########
+# TO COMMIT BEFORE RELEASE
+# Animations - mixamo assets
+Assets/Animations/*.md
+Assets/Animations/*.md.meta
+Assets/Animations/**/*.anim
+
+# Lipsync
+Assets/Oculus
