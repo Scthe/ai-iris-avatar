@@ -10,9 +10,11 @@ def seconds_to_str(sec: float):
 
 
 class Timer:
-    def __init__(self):
+    def __init__(self, start=False):
         self._start_time = None  # : float
         self.delta = None  # : float
+        if start:
+            self.start()
 
     def start(self):
         self._start_time = timer()

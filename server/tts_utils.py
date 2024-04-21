@@ -2,6 +2,8 @@ from TTS.api import TTS
 from server.config import AppConfig
 from termcolor import colored
 
+from server.tts_deepspeed import xtts_with_deepspeed, can_load_xtts2_with_deepspeed
+
 
 def get_torch_device(tts: TTS):
     model = tts.synthesizer.tts_model
@@ -11,8 +13,12 @@ def get_torch_device(tts: TTS):
 def create_tts(cfg: AppConfig):
     from TTS.api import TTS
 
-    print(colored("TTS model:", "blue"), cfg.tts.model_name)
-    tts = TTS(model_name=cfg.tts.model_name, gpu=cfg.tts.use_gpu, progress_bar=True)
+    model_name = cfg.tts.model_name
+    print(colored("TTS model:", "blue"), model_name)
+    if can_load_xtts2_with_deepspeed(cfg):
+        return xtts_with_deepspeed(cfg)
+
+    tts = TTS(model_name=model_name, gpu=cfg.tts.use_gpu, progress_bar=True)
     print(colored("TTS device:", "blue"), get_torch_device(tts))
     return tts
 
