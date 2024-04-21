@@ -33,7 +33,7 @@ function messagesReducer(state, action) {
         ...state,
         messages: [
           createMessage(MSG_TYPE.user, undefined, { text }),
-          createMessage(MSG_TYPE.ai, respMsgId, { text: '' }),
+          createMessage(MSG_TYPE.ai, respMsgId, { text: undefined }),
           ...state.messages,
         ],
       };
@@ -54,6 +54,15 @@ function messagesReducer(state, action) {
         messages: updateMessage(msgId, (m) => {
           const acc = m?.meta?.elapsed_tts || 0.0;
           m.meta = { ...(m.meta || {}), elapsed_tts: acc + elapsed_tts };
+        }),
+      };
+    }
+    case 'ai-tts-first-chunk': {
+      const { tts_first_chunk, msgId } = action;
+      return {
+        ...state,
+        messages: updateMessage(msgId, (m) => {
+          m.meta = { ...(m.meta || {}), tts_first_chunk };
         }),
       };
     }
@@ -134,6 +143,11 @@ export function useMessagesState(socket) {
       case 'tts-elapsed': {
         const { elapsed_tts } = msg;
         dispatch({ action: 'ai-tts-elapsed', msgId, elapsed_tts });
+        break;
+      }
+      case 'tts-first-chunk': {
+        const { first_chunk_tts: tts_first_chunk } = msg;
+        dispatch({ action: 'ai-tts-first-chunk', msgId, tts_first_chunk });
         break;
       }
       case 'done': {

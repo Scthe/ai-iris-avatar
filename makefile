@@ -1,4 +1,5 @@
 # source .venv/Scripts/Activate
+# nvidia-smi
 
 pip-freeze:
 	pip freeze > requirements.txt

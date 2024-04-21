@@ -38,6 +38,8 @@ tts:
   # Optional file that contains voice we will be cloning
   # sample_of_cloned_voice_wav: 'voice_to_clone.wav'
 
+  deepspeed_enabled: True
+
 server:
   host: 'localhost'
   port: 8080

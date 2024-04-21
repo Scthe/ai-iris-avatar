@@ -10,7 +10,7 @@ class LlmCfg(BaseModel):
     temperature: PositiveFloat = 0.7
     top_k: PositiveInt = 40
     top_p: PositiveFloat = 0.9
-    context_length: PositiveInt = 10
+    context_length: NonNegativeInt = 10
     system_message: Optional[str] = None
     api: str = "http://localhost:11434"
 
@@ -25,6 +25,7 @@ class TtsCfg(BaseModel):
     speaker: Optional[str] = None
     language: Optional[str] = None
     sample_of_cloned_voice_wav: Optional[str] = None
+    deepspeed_enabled: StrictBool = True
 
 
 class ServerCfg(BaseModel):

@@ -1,14 +1,10 @@
-from inject_external_torch_into_path import inject_path
-from xtts_scripts import create_speaker_samples, speak
-
-inject_path()
-
 from termcolor import colored
 from ollama import AsyncClient
 import click
 
 from server.config import load_app_config
 from server.tts_utils import create_tts
+from xtts_scripts import create_speaker_samples, speak
 
 DEFAULT_TTS_TEXT = "The current algorithm only upscales the luma, the chroma is preserved as-is. This is a common trick known"
 

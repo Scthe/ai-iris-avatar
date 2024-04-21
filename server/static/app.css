@@ -2,7 +2,7 @@ html {
   --col-bg-v: 23 23 23;
   --col-bg: rgb(var(--col-bg-v));
   --col-white: #e2e2e2;
-  --col-accent-v: 121 255 84;
+  --col-accent-v: 108 172 245;
   --col-accent: rgb(var(--col-accent-v));
   --bk-large: 1024px;
 

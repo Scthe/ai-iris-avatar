@@ -47,7 +47,7 @@ async def websocket_handler(request):
     finally:
         request.app[websockets].discard(ws)
         handler.on_disconnect()
-    print(colored("Websocket connection closed", "yellow"))
+    print(colored(f"Websocket connection closed ({is_unity_str})", "yellow"))
 
     return ws
 

@@ -27,12 +27,14 @@ class SocketMsgHandler:
             app_logic.on_query.append(self.on_query)
             app_logic.on_text_response.append(self.on_text_response)
             app_logic.on_tts_timings.append(self.on_tts_timinigs)
+            app_logic.on_tts_first_chunk.append(self.on_tts_first_chunk)
 
     def on_disconnect(self):
         self.app_logic.on_query.safe_remove(self.on_query)
         self.app_logic.on_text_response.safe_remove(self.on_text_response)
         self.app_logic.on_tts_response.safe_remove(self.on_tts_response)
         self.app_logic.on_tts_timings.safe_remove(self.on_tts_timinigs)
+        self.app_logic.on_tts_first_chunk.safe_remove(self.on_tts_first_chunk)
         self.app_logic.on_play_vfx.safe_remove(self.on_play_vfx)
 
     async def __call__(self, msg):
@@ -85,6 +87,14 @@ class SocketMsgHandler:
     async def on_tts_response(self, bytes):
         # print("on_tts_response()")
         await self.ws_send_bytes(bytes)
+
+    async def on_tts_first_chunk(self, msg_id: str, elapsed_tts: float):
+        data = {
+            "type": "tts-first-chunk",
+            "msgId": msg_id,
+            "first_chunk_tts": elapsed_tts,
+        }
+        await self.ws_send_json(data)
 
     async def on_tts_timinigs(self, msg_id: str, elapsed_tts: float):
         data = {

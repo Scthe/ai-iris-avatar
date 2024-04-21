@@ -34,7 +34,7 @@ class GemmaChatContext:
         if ctx_len > 0:
             self.history = self.history[-ctx_len * 2 :]
         else:
-            self.history = []
+            self.history = self.history[-1:]
         context = "".join(self.history)
 
         system_message = self.cfg.llm.system_message
@@ -73,6 +73,7 @@ class AppLogic:
         self.on_text_response = Signal()
         self.on_tts_response = Signal()
         self.on_tts_timings = Signal()
+        self.on_tts_first_chunk = Signal()
         self.on_play_vfx = Signal()
 
     async def ask_query(self, query: str, msg_id: Optional[str] = ""):
@@ -82,12 +83,15 @@ class AppLogic:
         await self.on_query.send(query, msg_id)
         self.chat_context.add_user_query(query)
 
+        time_to_first_tts = Timer(start=True)
+
         with Timer() as llm_timer:
             resp_text = await self._exec_llm(query)
             self.chat_context.add_model_response(resp_text)
         await self.on_text_response.send(resp_text, msg_id, llm_timer.delta)
 
-        await self._exec_tts(resp_text, msg_id)  # internally can use different thread
+        # internally can use different thread
+        await self._exec_tts(resp_text, msg_id, time_to_first_tts)
 
         return resp_text
 
@@ -98,7 +102,7 @@ class AppLogic:
     def reset_context(self):
         self.chat_context.reset()
 
-    async def _exec_llm(self, query: str):
+    async def _exec_llm(self, query: str) -> str:
         """If this fn returns nothing, just restart ollama"""
 
         cfg = self.cfg.llm
@@ -125,10 +129,11 @@ class AppLogic:
         )
         return resp.get("response")
 
-    async def _exec_tts(self, text: str, msg_id: str):
+    async def _exec_tts(self, text: str, msg_id: str, time_to_first_tts: Timer):
         # skip if no event listeners
         if not self.on_tts_response:
             await self.on_tts_timings.send(msg_id, 0)
+            await self.on_tts_first_chunk.send(msg_id, 0)
             return
 
         # TODO https://docs.coqui.ai/en/latest/models/xtts.html#streaming-manually
@@ -140,7 +145,17 @@ class AppLogic:
             is_first_sentence = True
             with Timer() as tts_timer:
                 for sentence in sentences:
-                    await self._tts_sentence(sentence, is_first_sentence)
+                    await self._tts_sentence(sentence)
+
+                    if is_first_sentence:
+                        time_to_first_tts.stop()
+                        await self.on_tts_first_chunk.send(
+                            msg_id, time_to_first_tts.delta
+                        )
+                        print(
+                            colored("First TTS chunk:", "blue"),
+                            f"{time_to_first_tts.delta}s",
+                        )
                     is_first_sentence = False
 
             # tts done, send timings
@@ -149,13 +164,10 @@ class AppLogic:
         loop = asyncio.get_running_loop()
         loop.create_task(tts_internal())
 
-    async def _tts_sentence(self, sentence: str, is_first_sentence: bool):
+    async def _tts_sentence(self, sentence: str):
         wav = exec_tts(self.cfg, self._tts, sentence)
         bytes = wav2bytes(self._tts, wav)
         await self._tts_send(bytes)
-
-        if is_first_sentence:
-            print(colored("Finished first TTS sentence (see above)", "blue"))
 
     async def _tts_send(self, bytes):
         await self.on_tts_response.send(bytes)

@@ -20,19 +20,57 @@ import { cx } from './scripts/utils.mjs';
 // Initialize htm with Preact
 const html = htm.bind(h);
 
+const fmtElapsed = (time) =>
+  typeof time === 'number' ? `${time.toFixed(2)}s` : '(processing)';
+
+function TimerLine({ label, title, time, total }) {
+  const percent = (time * 100) / total;
+  const percentStr = isNaN(percent)
+    ? ''
+    : `${HARD_SPACE}(${percent.toFixed(0)}%)`;
+
+  return html`<p title=${title}>
+    ${label} ${HARD_SPACE}
+    <span class="colored">${fmtElapsed(time)}${percentStr}</span>
+  </p>`;
+}
+
 function MessageMeta({ type, meta }) {
   meta = type === MSG_TYPE.ai ? meta : undefined;
   if (meta == undefined) {
     return undefined;
   }
 
-  const { elapsed_llm, elapsed_tts } = meta;
-  const fmtElapsed = (time) =>
-    typeof time === 'number' ? `${time.toFixed(2)}s` : '(processing)';
+  const { elapsed_llm, elapsed_tts, tts_first_chunk } = meta;
+  const total =
+    typeof elapsed_llm === 'number' && typeof elapsed_tts === 'number'
+      ? elapsed_llm + elapsed_tts
+      : undefined;
 
   return html`<div class="message-meta">
-    <p>Elapsed LLM: <span class="colored">${fmtElapsed(elapsed_llm)}</span></p>
-    <p>Elapsed TTS: <span class="colored">${fmtElapsed(elapsed_tts)}</span></p>
+    <${TimerLine}
+      label="Elapsed LLM:"
+      time=${elapsed_llm}
+      total=${total}
+      title="Time from receiving request to generated text"
+    />
+    <${TimerLine}
+      label="Elapsed TTS:"
+      time=${elapsed_tts}
+      total=${total}
+      title="Time from generated text to finished WAV generation"
+    />
+    <${TimerLine}
+      label="Elapsed total:"
+      time=${total}
+      title="Time from receiving request to finished WAV generation (LLM + TTS)"
+    />
+    <${TimerLine}
+      label="TTS first chunk:"
+      time=${tts_first_chunk}
+      total=${total}
+      title="Time from receiving request to first sound"
+    />
   </div>`;
 }
 
@@ -42,10 +80,10 @@ function Message({ type, text, meta, error, status }) {
 
   const systemMsgProps = SYSTEM_MSG_PROPS[status];
   // console.log(systemMsgProps);
-  text =
-    type === MSG_TYPE.system && systemMsgProps && systemMsgProps.text
-      ? systemMsgProps.text
-      : text;
+  const overrideWithSystemMsgText =
+    type === MSG_TYPE.system && systemMsgProps && systemMsgProps.text;
+
+  text = overrideWithSystemMsgText ? systemMsgProps.text : text;
   text = type === MSG_TYPE.ai && error ? `Error: ${error}` : text;
 
   const cl = cx('message', {
@@ -54,7 +92,7 @@ function Message({ type, text, meta, error, status }) {
     'message-system-error': type === MSG_TYPE.system && systemMsgProps?.isError,
     'message-system-intro': type === MSG_TYPE.system && systemMsgProps?.isIntro,
     'message-ai': type === MSG_TYPE.ai,
-    'message-ai-empty': type === MSG_TYPE.ai && text.length == 0,
+    'message-ai-empty': type === MSG_TYPE.ai && text == undefined,
     'message-ai-error': type === MSG_TYPE.ai && error,
   });
 
@@ -140,7 +178,7 @@ function UserInput({
         class="user-input-reconnect-btn reset-focus-states"
         onClick=${onReconnect}
       >
-        <p>Try reconnect</p>
+        <p>Reconnect</p>
         <${ReconnectIcon} iconSize=${iconSize} />
       </button>
     </div>`;
@@ -230,7 +268,7 @@ function App() {
 
   return html`<main class="app-main">
     <div class="app-header">
-      <h1>Avatar controller</h1>
+      <h1>AI Iris Avatar controller</h1>
       <a
         href=${GITHUB_LINK}
         title="See the repo on GitHub"
