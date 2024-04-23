@@ -27,6 +27,9 @@ class Timer:
         self._start_time = None
         return self.delta
 
+    def is_running(self):
+        return self._start_time != None
+
     def __str__(self):
         if self._start_time != None:
             return "running"

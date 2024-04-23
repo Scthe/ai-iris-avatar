@@ -2,10 +2,11 @@ from TTS.api import TTS
 from termcolor import colored
 from ollama import AsyncClient as OllamaAsyncClient
 from typing import Optional
+import types
 import asyncio
 
 from server.config import AppConfig
-from server.tts_utils import exec_tts, wav2bytes
+from server.tts_utils import exec_tts, wav2bytes, wav2bytes_streamed
 from server.signal import Signal
 from server.utils import Timer, generate_id
 
@@ -132,6 +133,7 @@ class AppLogic:
     async def _exec_tts(self, text: str, msg_id: str, time_to_first_tts: Timer):
         # skip if no event listeners
         if not self.on_tts_response:
+            # pass  # TODO restore
             await self.on_tts_timings.send(msg_id, 0)
             await self.on_tts_first_chunk.send(msg_id, 0)
             return
@@ -142,21 +144,10 @@ class AppLogic:
         sentences = self._tts.synthesizer.split_into_sentences(text)
 
         async def tts_internal():
-            is_first_sentence = True
             with Timer() as tts_timer:
                 for sentence in sentences:
                     await self._tts_sentence(sentence)
-
-                    if is_first_sentence:
-                        time_to_first_tts.stop()
-                        await self.on_tts_first_chunk.send(
-                            msg_id, time_to_first_tts.delta
-                        )
-                        print(
-                            colored("First TTS chunk:", "blue"),
-                            f"{time_to_first_tts.delta}s",
-                        )
-                    is_first_sentence = False
+                    await self._time_first_audio_chunk(msg_id, time_to_first_tts)
 
             # tts done, send timings
             await self.on_tts_timings.send(msg_id, tts_timer.delta)
@@ -165,9 +156,25 @@ class AppLogic:
         loop.create_task(tts_internal())
 
     async def _tts_sentence(self, sentence: str):
-        wav = exec_tts(self.cfg, self._tts, sentence)
-        bytes = wav2bytes(self._tts, wav)
-        await self._tts_send(bytes)
+        output = exec_tts(self.cfg, self._tts, sentence)  # either object or generator
 
-    async def _tts_send(self, bytes):
-        await self.on_tts_response.send(bytes)
+        if not isinstance(output, types.GeneratorType):
+            # when not streaming
+            bytes = wav2bytes(self._tts, output)
+            await self.on_tts_response.send(bytes)  # send to client
+        else:
+            # when streaming
+            for chunk in output:
+                bytes = wav2bytes_streamed(self._tts, chunk)
+                await self.on_tts_response.send(bytes)  # send to client
+
+    async def _time_first_audio_chunk(self, msg_id: str, time_to_first_tts: Timer):
+        if not time_to_first_tts.is_running():
+            return
+
+        delta = time_to_first_tts.stop()
+        await self.on_tts_first_chunk.send(msg_id, delta)
+        print(
+            colored("First TTS chunk:", "blue"),
+            f"{time_to_first_tts.delta}s",
+        )

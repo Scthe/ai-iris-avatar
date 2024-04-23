@@ -1,6 +1,8 @@
 from TTS.api import TTS
 from server.config import AppConfig
 from termcolor import colored
+from typing import List
+import torch
 
 from server.tts_deepspeed import xtts_with_deepspeed, can_load_xtts2_with_deepspeed
 
@@ -24,10 +26,10 @@ def create_tts(cfg: AppConfig):
 
 
 def list_speakers(tts: TTS):
-    sm = tts.synthesizer.tts_model.speaker_manager
-    if sm == None:
+    speaker_manager = tts.synthesizer.tts_model.speaker_manager
+    if speaker_manager == None:
         return []
-    return list(tts.synthesizer.tts_model.speaker_manager.name_to_id)
+    return list(speaker_manager.name_to_id)
 
 
 def get_tts_options(cfg: AppConfig, tts: TTS):
@@ -79,9 +81,37 @@ def exec_tts_to_file(
     return wav
 
 
-def wav2bytes(tts: TTS, wav):
+def wav2bytes(tts: TTS, wav: List[int]):
     import io
 
     out = io.BytesIO()
     tts.synthesizer.save_wav(wav, out)
+    return out.getbuffer()
+
+
+def wav2bytes_streamed(tts: TTS, chunk: torch.Tensor):
+    import torch
+    import numpy as np
+    import io
+    import scipy
+
+    # from TTS.utils.audio.numpy_transforms import save_wav
+
+    if isinstance(chunk, list):
+        chunk = torch.cat(chunk, dim=0)
+    chunk = chunk.clone().detach().cpu().numpy()
+    if isinstance(chunk, list):
+        chunk = np.array(chunk)
+    # chunk = chunk[None, : int(chunk.shape[0])]
+    chunk = np.clip(chunk, -1, 1)
+    chunk = (chunk * 32767).astype(np.int16)
+
+    # based on: tts.synthesizer.save_wav(chunk, out)
+    out = io.BytesIO()
+    sample_rate = tts.synthesizer.output_sample_rate
+    scipy.io.wavfile.write(out, sample_rate, chunk)
+
+    # conn.send(('success', chunk_bytes))
+    # chunk_duration = len(chunk_bytes) / (4 * 24000)  # 4 bytes per sample, 24000 Hz
+    # full_generated_seconds += chunk_duration
     return out.getbuffer()
