@@ -4,7 +4,7 @@ from termcolor import colored
 from typing import List
 import torch
 
-from server.tts_deepspeed import xtts_with_deepspeed, can_load_xtts2_with_deepspeed
+from server.tts_deepspeed import raw_xtts_model_required
 
 
 def get_torch_device(tts: TTS):
@@ -12,14 +12,17 @@ def get_torch_device(tts: TTS):
     return next(model.parameters()).device
 
 
-def create_tts(cfg: AppConfig):
+def create_tts(cfg: AppConfig) -> TTS:
     from TTS.api import TTS
 
     model_name = cfg.tts.model_name
     print(colored("TTS model:", "blue"), model_name)
-    if can_load_xtts2_with_deepspeed(cfg):
-        return xtts_with_deepspeed(cfg)
+    tts = raw_xtts_model_required(cfg)
+    if tts != None:
+        print(colored("TTS device:", "blue"), get_torch_device(tts))
+        return tts
 
+    # create normal TTS
     tts = TTS(model_name=model_name, gpu=cfg.tts.use_gpu, progress_bar=True)
     print(colored("TTS device:", "blue"), get_torch_device(tts))
     return tts
@@ -95,7 +98,7 @@ def wav2bytes_streamed(tts: TTS, chunk: torch.Tensor):
     import io
     import scipy
 
-    # from TTS.utils.audio.numpy_transforms import save_wav
+    # from
 
     if isinstance(chunk, list):
         chunk = torch.cat(chunk, dim=0)
@@ -106,12 +109,13 @@ def wav2bytes_streamed(tts: TTS, chunk: torch.Tensor):
     chunk = np.clip(chunk, -1, 1)
     chunk = (chunk * 32767).astype(np.int16)
 
-    # based on: tts.synthesizer.save_wav(chunk, out)
+    # based on:
+    # - `tts.synthesizer.save_wav(chunk, out)`
+    # - `TTS.utils.audio.numpy_transforms import save_wav`
     out = io.BytesIO()
     sample_rate = tts.synthesizer.output_sample_rate
     scipy.io.wavfile.write(out, sample_rate, chunk)
 
-    # conn.send(('success', chunk_bytes))
-    # chunk_duration = len(chunk_bytes) / (4 * 24000)  # 4 bytes per sample, 24000 Hz
-    # full_generated_seconds += chunk_duration
+    # chunk_duration = len(chunk_bytes) / (4 * sample_rate)  # 4 bytes per sample, 24000 Hz
+    # generated_seconds += chunk_duration
     return out.getbuffer()

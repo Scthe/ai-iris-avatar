@@ -133,12 +133,9 @@ class AppLogic:
     async def _exec_tts(self, text: str, msg_id: str, time_to_first_tts: Timer):
         # skip if no event listeners
         if not self.on_tts_response:
-            # pass  # TODO restore
             await self.on_tts_timings.send(msg_id, 0)
             await self.on_tts_first_chunk.send(msg_id, 0)
             return
-
-        # TODO https://docs.coqui.ai/en/latest/models/xtts.html#streaming-manually
 
         # split into sentences to lower time to first chunk
         sentences = self._tts.synthesizer.split_into_sentences(text)
@@ -164,9 +161,11 @@ class AppLogic:
             await self.on_tts_response.send(bytes)  # send to client
         else:
             # when streaming
-            for chunk in output:
+            for i, chunk in enumerate(output):
                 bytes = wav2bytes_streamed(self._tts, chunk)
+                # print(colored(f"raw_chunk_{i}", "yellow"), "sending")
                 await self.on_tts_response.send(bytes)  # send to client
+                # print(colored(f"raw_chunk_{i}", "yellow"), "send success")
 
     async def _time_first_audio_chunk(self, msg_id: str, time_to_first_tts: Timer):
         if not time_to_first_tts.is_running():

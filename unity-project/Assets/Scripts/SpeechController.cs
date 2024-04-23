@@ -102,7 +102,7 @@ public class SpeechController : MonoBehaviour
 
     if (!muteInitial)
     {
-      Speak(initialAudioClip);
+      ScheduleNextAudioClip(initialAudioClip);
     }
   }
 
@@ -114,49 +114,32 @@ public class SpeechController : MonoBehaviour
     {
       if (clipQueue.Count > 0)
       {
-        // Alternative is to use .playscheduled(), but we want to always
-        // start both clips at same time.
-        // https://johnleonardfrench.com/ultimate-guide-to-playscheduled-in-unity/
-        var clip = clipQueue.Dequeue();
-        Speak(clip);
+        StopBreathing();
+        PlayNextAudioClip();
+        isSpeaking = true;
       }
       else
       {
-        UpdateWhenNotSpeaking();
+        EnsureBreathing(); // nice name btw.
       }
     }
 
+    if (prevIsSpeaking != isSpeaking)
+    {
+      onIsSpeakingChange?.Invoke(isSpeaking);
+    }
     prevIsSpeaking = isSpeaking;
   }
 
-  private void UpdateWhenNotSpeaking()
+  public void PlayNextAudioClip()
   {
-    EnsureBreathing(); // nice name btw.
+    var audioClip = clipQueue.Dequeue();
 
-    if (prevIsSpeaking)
-    {
-      onIsSpeakingChange?.Invoke(false);
-    }
-  }
-
-  public void Speak(AudioClip audioClip)
-  {
-    StopBreathing();
-
-    if (IsSpeaking() || clipQueue.Count > 0)
-    {
-      clipQueue.Enqueue(audioClip);
-    }
-    else
-    {
-      PlayLipSyncAnimation(audioClip);
-      PlaySpeechSound(audioClip);
-
-      onIsSpeakingChange?.Invoke(true);
-    }
-
-    // copy members just in case
-    // StartCoroutine(SpeakCoroutine(audioClip, audioDelay, playSoundBeforeLipSync));
+    // Alternative is to use .playscheduled(), but we want to always
+    // start both clips at same time.
+    // https://johnleonardfrench.com/ultimate-guide-to-playscheduled-in-unity/
+    PlayLipSyncAnimation(audioClip);
+    PlaySpeechSound(audioClip);
   }
 
   private bool IsSpeaking()
@@ -164,31 +147,21 @@ public class SpeechController : MonoBehaviour
     return speakerWithLipSync.isPlaying || GetComponent<AudioSource>().isPlaying;
   }
 
-  /*
-    private IEnumerator SpeakCoroutine(AudioClip audioClip, int audioDelay, bool playSoundBeforeLipSync)
-    {
-      Func<bool, bool> playSoundOrAnimation = (isPlaySound) => isPlaySound ? PlaySpeechSound(audioClip) : PlayLipSyncAnimation(audioClip);
-      Debug.Log("dt:" + MyUtils.s2ms(Time.deltaTime) + "ms");
-
-      playSoundOrAnimation(playSoundBeforeLipSync);
-
-      if (audioDelay > 0)
-      {
-        yield return MyUtils.wait(MyUtils.ms2s((float)audioDelay));
-      }
-
-      Debug.Log("dt:" + MyUtils.s2ms(Time.deltaTime) + "ms");
-      playSoundOrAnimation(!playSoundBeforeLipSync);
-    }
-  */
-
   public void SpeakWavFileFromBytes(byte[] bytes)
   {
     var pcmData = PcmData.FromBytes(bytes);
     var audioClip = AudioClip.Create("pcm", pcmData.Length, pcmData.Channels, pcmData.SampleRate, false);
     audioClip.SetData(pcmData.Value, 0);
 
-    Speak(audioClip);
+    ScheduleNextAudioClip(audioClip);
+  }
+
+  private void ScheduleNextAudioClip(AudioClip audioClip)
+  {
+    if (audioClip != null)
+    {
+      clipQueue.Enqueue(audioClip);
+    }
   }
 
   private bool PlaySpeechSound(AudioClip audioClip)

@@ -38,7 +38,25 @@ tts:
   # Optional file that contains voice we will be cloning
   # sample_of_cloned_voice_wav: 'voice_to_clone.wav'
 
+  # Allow to use DeepSpeed library for faster TTS inference
+  # https://github.com/microsoft/DeepSpeed
   deepspeed_enabled: True
+
+  # Split text into smalelr chunks to stream them faser. Lower chunk size
+  # reduces time to first sound, but might produce glitches between
+  # chunks.
+  # Recommended ON, but make sure that GPU can infer in real time (deepspeed helps).
+  streaming_enabled: False
+  # GPT generates sound in chunks. Collect $chunk_size of such chunks
+  # and send them to the client.
+  # - small chunk: faster first sound, might introduce 'glitches'
+  #       between chunks. More inconsistencies between speech styles.
+  #       E.g. 20 is quite tiny
+  # - larger chunk: slower first sound, but more 'consistent' throught.
+  streaming_chunk_size: 20
+  # crossfade between 2 consequtive chunks to prevent 'glitches'
+  # when next chunk has different speech style.
+  streaming_overlap_wav_len: 1024
 
 server:
   host: 'localhost'

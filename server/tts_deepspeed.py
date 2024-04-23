@@ -6,16 +6,18 @@ from termcolor import colored
 
 from server.config import AppConfig
 
-"""
-TODO
-- voice cloning with cached latents?
-    - make sure it works with xtts_scripts
-"""
 
-
-class FakeTTSWithDeepspeed:
-    def __init__(self, tts_config: XttsConfig, model: Xtts):
-        self.is_streaming = False  # TODO
+class FakeTTSWithRawXTTS2:
+    def __init__(
+        self,
+        app_config: AppConfig,
+        tts_config: XttsConfig,
+        model: Xtts,
+        use_streaming=False,
+    ):
+        print(colored(f"--- Using custom TTS class {type(self).__name__}--", "blue"))
+        self.app_config = app_config
+        self.streaming_enabled = use_streaming
         self.model = model  # this model already has deepspeed flag
         self.is_multi_speaker = True
         self.is_multi_lingual = True
@@ -27,7 +29,21 @@ class FakeTTSWithDeepspeed:
         self.synthesizer.tts_model = model
         self.synthesizer.output_sample_rate = tts_config.audio["output_sample_rate"]
 
+        cloned_voice_wav = app_config.tts.sample_of_cloned_voice_wav
+        if cloned_voice_wav != None:
+            if self.streaming_enabled:
+                print(
+                    colored("Streaming with voice cloning:", "blue"),
+                    f"'{cloned_voice_wav}'",
+                )
+            gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
+                audio_path=[cloned_voice_wav]
+            )
+            self.gpt_cond_latent = gpt_cond_latent.to(self.model.device)
+            self.speaker_embedding = speaker_embedding.to(self.model.device)
+
     def _get_speaker_embedding_and_latents(self, speaker_name: str):
+        """Used only for streaming mode"""
         if self.gpt_cond_latent == None:
             speaker = self.model.speaker_manager.speakers.get(speaker_name)
             gpt_cond_latent = speaker.get("gpt_cond_latent")
@@ -37,7 +53,7 @@ class FakeTTSWithDeepspeed:
         return self.speaker_embedding, self.gpt_cond_latent
 
     def tts(self, text: str, **kwargs):
-        if self.is_streaming:
+        if self.streaming_enabled:
             return self.tts_streamed(text, **kwargs)
         else:
             return self._tts_internal(text, **kwargs)
@@ -48,6 +64,7 @@ class FakeTTSWithDeepspeed:
             **kwargs,
         )
         self.synthesizer.save_wav(wav=wav, path=file_path, pipe_out=None)
+        # torchaudio.save(file_path, torch.tensor(wav[0]).unsqueeze(0), 24000) # alternative
         return file_path
 
     def _tts_internal(self, text: str, **kwargs):
@@ -81,36 +98,20 @@ class FakeTTSWithDeepspeed:
             gpt_cond_latent=gpt_cond_latent,
             speaker_embedding=speaker_embedding,
             enable_text_splitting=False,  # assumed you've already did it
-            # stream_chunk_size=stream_chunk_size, # TODO
-            # overlap_wav_len=overlap_wav_len, # TODO
+            stream_chunk_size=self.app_config.tts.streaming_chunk_size,
+            overlap_wav_len=self.app_config.tts.streaming_overlap_wav_len,
         )
-        # TODO .venv\Lib\site-packages\TTS\tts\utils\synthesis.py?
-        # print(colored("result", "blue"), outputs.keys())
-        # waveform = outputs["wav"]
-        # waveform = waveform.cpu()
-        # exit(0)
-        # return out
-        # return [waveform]
-        for chunk in outputs:
-            print(colored("raw_chunk", "yellow"), chunk)
-            # bytes = wav2bytes_streamed(self, chunk)
-            # yield bytes
+        for i, chunk in enumerate(outputs):
+            # print(colored(f"raw_chunk_{i}", "yellow"), chunk)
             yield chunk
 
-    def tts_to_file_v0(self, text: str, file_path: str, **kwargs):
-        import numpy as np
-        import torch
-        import torchaudio
-        from TTS.utils.audio.numpy_transforms import save_wav
-
-        wav = self._tts_internal(text, **kwargs)
-        torchaudio.save(file_path, torch.tensor(wav[0]).unsqueeze(0), 24000)
-
     def tts_with_vc(self, text: str, **kwargs):
-        raise Exception("Not available with deepspeed: tts_with_vc()")
+        # assumes latents are already set in constructor
+        return self.tts(text, **kwargs)
 
     def tts_with_vc_to_file(self, text: str, **kwargs):
-        raise Exception("Not available with deepspeed: tts_with_vc_to_file()")
+        # assumes latents are already set in constructor
+        return self.tts_to_file(text, **kwargs)
 
 
 def check_deepspeed():
@@ -124,35 +125,29 @@ def check_deepspeed():
     return deepspeed_available
 
 
-def can_load_xtts2_with_deepspeed(cfg: AppConfig):
-    is_ds = check_deepspeed()
-    is_xtts2 = "xtts_v2" in cfg.tts.model_name
-    is_cfg = cfg.tts.deepspeed_enabled
-    result = is_ds and is_xtts2 and is_cfg
-    reason = f"has_library={is_ds}, is_xtts2={is_xtts2}, cfg_allows={is_cfg}"
-    print(colored("Deepspeed:", "blue"), "ON" if result else "OFF", f"({reason})")
-    return result
-
-
-def xtts_with_deepspeed(cfg: AppConfig):
+def create_wrapped_xtts(
+    app_config: AppConfig, use_deepspeed=False, use_streaming=False
+):
     tts = TTS(progress_bar=True)
     xtts_model_dir, config_path, model_item = tts.manager.download_model(
-        cfg.tts.model_name
+        app_config.tts.model_name
     )
     # print(f"model_path={xtts_model_dir}")
     # print(f"config_path={config_path}")
     # print(f"model_item={model_item}")
 
-    config = XttsConfig()
-    config.load_json(f"{xtts_model_dir}/config.json")  # "/path/to/xtts/config.json"
-    model = Xtts.init_from_config(config)
+    model_config = XttsConfig()
+    model_config.load_json(
+        f"{xtts_model_dir}/config.json"
+    )  # "/path/to/xtts/config.json"
+    model = Xtts.init_from_config(model_config)
     model.load_checkpoint(
-        config,
+        model_config,
         checkpoint_dir=xtts_model_dir,
-        use_deepspeed=True,
+        use_deepspeed=use_deepspeed,
     )
     # model.to(device)
-    model.cuda()
+    model.cuda()  # let's be honest. You will use deepspeed/streaming with CUDA..
 
     # print("---")
     # print(colored("dir", "blue"), dir(model.speaker_manager))
@@ -163,4 +158,30 @@ def xtts_with_deepspeed(cfg: AppConfig):
     # print(colored("speakers", "blue"), speaker.keys())
     # exit(0)
 
-    return FakeTTSWithDeepspeed(config, model)
+    return FakeTTSWithRawXTTS2(
+        app_config, model_config, model, use_streaming=use_streaming
+    )
+
+
+def raw_xtts_model_required(cfg: AppConfig):
+    """Use custom TTS class if needed, instead of the one from library"""
+    is_ds = check_deepspeed()
+    is_xtts2 = "xtts_v2" in cfg.tts.model_name
+    is_cfg_ds = cfg.tts.deepspeed_enabled
+    is_cfg_stream = cfg.tts.streaming_enabled
+
+    reason_ds = f"is_xtts2={is_xtts2}, has_library={is_ds}, cfg_allows={is_cfg_ds}"
+    reason_stream = f"is_xtts2={is_xtts2}, cfg_allows={is_cfg_stream}"
+
+    requires_raw_xtts = is_ds and is_xtts2 and (is_cfg_ds or is_cfg_stream)
+    if requires_raw_xtts:
+        flag_str = lambda x: "ON" if x else "OFF"
+        print(colored("Deepspeed:", "blue"), flag_str(is_cfg_ds), f"({reason_ds})")
+        print(
+            colored("Streaming:", "blue"), flag_str(is_cfg_stream), f"({reason_stream})"
+        )
+        return create_wrapped_xtts(cfg, is_cfg_ds, is_cfg_stream)
+
+    print(colored("Deepspeed:", "blue"), "OFF", f"({reason_ds})")
+    print(colored("Streaming:", "blue"), "OFF", f"({reason_stream})")
+    return None

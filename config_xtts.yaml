@@ -14,3 +14,12 @@ tts:
   model_name: 'tts_models/multilingual/multi-dataset/xtts_v2'
   speaker: 'Rosemary Okafor'
   language: 'en'
+
+  # deepspeed_enabled: False # default is True, will check for installed library
+
+  streaming_enabled: True # default is False
+  streaming_chunk_size: 60
+  streaming_overlap_wav_len: 4096
+
+  # works best with streaming, although quality is as expected from real-time
+  # sample_of_cloned_voice_wav: 'voice_to_clone.wav'

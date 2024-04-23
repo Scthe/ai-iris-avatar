@@ -24,6 +24,7 @@ def create_speaker_samples(config: str, voice: Optional[str]):
     """Generate samples for each speaker in the TTS model. Supports voice cloning."""
 
     cfg = load_app_config(config)
+    cfg.tts.streaming_enabled = False
     print(colored("TTS config:", "blue"), cfg.tts)
     tts = create_tts(cfg)
     if not tts.is_multi_speaker:
@@ -69,6 +70,7 @@ def speak(config: str, input: str, voice: Optional[str]):
     """Speak the text and write the result into the file. Can also voice-clone."""
 
     cfg = load_app_config(config)
+    cfg.tts.streaming_enabled = False
     if voice != None:
         cfg.tts.sample_of_cloned_voice_wav = voice
     print(colored("Config", "blue"), cfg)

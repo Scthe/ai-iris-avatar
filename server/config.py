@@ -26,6 +26,9 @@ class TtsCfg(BaseModel):
     language: Optional[str] = None
     sample_of_cloned_voice_wav: Optional[str] = None
     deepspeed_enabled: StrictBool = True
+    streaming_enabled: StrictBool = False
+    streaming_chunk_size: PositiveInt = 20  # XTTS default: 20
+    streaming_overlap_wav_len: PositiveInt = 1024  # XTTS default: 1024
 
 
 class ServerCfg(BaseModel):
