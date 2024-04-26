@@ -3,11 +3,12 @@ llm:
   # mocked_response: ''
   # mocked_response: 'Michael Jordan is a renowned American basketball player known for his exceptional skills and captivating performances. He dominated the sport with six NBA championships, setting a record that remains unbroken to this day.'
 
-  context_length: 10
+  context_length: 1
   system_message: >-
     Answer the question using your general knowledge.
     If you don't know the answer, just say that you don't know.
     Use three sentences maximum and keep the answer concise.
+    Keep sentences short, no more than 8 words.
 
 tts:
   use_gpu: True
@@ -18,7 +19,7 @@ tts:
   # deepspeed_enabled: False # default is True, will check for installed library
 
   streaming_enabled: True # default is False
-  streaming_chunk_size: 60
+  streaming_chunk_size: 60 # quick debug: 20
   streaming_overlap_wav_len: 4096
 
   # works best with streaming, although quality is as expected from real-time

@@ -85,7 +85,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animCount: 5
   blendVariableName: IdleAnimIdx2
-  debugLogChanges: 1
+  debugLogChanges: 0
 --- !u!1101 &-7563427545409730059
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

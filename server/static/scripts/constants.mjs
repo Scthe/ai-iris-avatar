@@ -42,7 +42,6 @@ export const AVAILABLE_VFX = [
   'ColorGradientVFX',
   'TinyPinkRibbonsVFX',
   'SnowVFX',
-  'LeafVFX',
   'PoppingRedCirclesVFX',
   'RainVFX',
   'BluePurpleFloatingVFX',
