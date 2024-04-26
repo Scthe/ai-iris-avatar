@@ -1,7 +1,23 @@
 # AI-Iris-Avatar
 
-`TODO videos. Add more screenshots at the end on the README? Add screen to install-usage?`
-`TODO video1: TTS | video2: add rain during TTS`
+Talk with AI-powered detailed 3D avatar. Use large language model (LLM), text-to-speech (TTS), Unity game engine, and lip sync to bring the character to life.
+
+
+
+https://github.com/Scthe/ai-iris-avatar/assets/9325337/5fbb2360-1e1d-4342-91ea-de32218464b6
+
+
+
+_In the video we are asking the character "Who is Michael Jordan?". The avatar 'answers' the question after a short delay. Using the [previous messages as a context](https://www.sctheblog.com/blog/rag-with-context/), we can have entire conversatons. Notice the hair physics and blinking!_
+
+
+
+https://github.com/Scthe/ai-iris-avatar/assets/9325337/92fa3da0-23c6-46b6-bf46-3f35cd54a96c
+
+
+
+_Showcase of remote events triggered from web browser. After selecting each VFX, the respective particle system is played. Popular usage is a firework particle effect when someone donates $5 on Twitch etc. During rain VFX you might even notice splash and bounce when droplet interacts with the character (top of the hair)._
+
 
 ## Feature set
 
@@ -176,6 +192,10 @@ Afterward, we are in transformers territory (surprise!). Last year, "Data Augmen
 At this point, I've decided that it was a feature creep to try to fit this into the app.
 
 > There was a Two Minute Papers episode that looked into similar techniques: ["Intel's Video Game Looks Like Reality!"](https://www.youtube.com/watch?v=22Sojtv4gbg). Based on Intel's "Enhancing Photorealism Enhancement" [Richter2021].
+
+### Q: Is the 3D model included?
+
+Yes, check .fbx inside [unity-project/Assets/Sintel](unity-project/Assets/Sintel).
 
 ### Q: What's with the name?
 
