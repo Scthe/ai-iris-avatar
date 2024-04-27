@@ -18,7 +18,7 @@ tts:
 
   # deepspeed_enabled: False # default is True, will check for installed library
 
-  streaming_enabled: True # default is False
+  streaming_enabled: False # default is False
   streaming_chunk_size: 60 # quick debug: 20
   streaming_overlap_wav_len: 4096
 

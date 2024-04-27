@@ -15,6 +15,13 @@
 *.unity linguist-generated
 
 # LFS
-*.fbx filter=lfs diff=lfs merge=lfs -text
-*.wav filter=lfs diff=lfs merge=lfs -text
-*.anim filter=lfs diff=lfs merge=lfs -text
+# *.fbx filter=lfs diff=lfs merge=lfs -text
+# *.wav filter=lfs diff=lfs merge=lfs -text
+# *.anim filter=lfs diff=lfs merge=lfs -text
+
+*.fbx binary
+*.wav binary
+*.anim binary
+*.exr binary
+*.pb binary
+*.dll binary

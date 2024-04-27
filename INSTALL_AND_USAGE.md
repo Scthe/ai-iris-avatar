@@ -39,11 +39,15 @@ You can find other commands in the [makefile](makefile):
 
 ### Start the Unity client
 
-Import Unity project from `unity-project`. Read ["Oculus Lipsync for Unity Development"](https://developer.oculus.com/documentation/unity/audio-ovrlipsync-unity/) beforehand (requires Windows/macOS). Their documentation also contains the "Download and Import" section in case of any problems. Make sure to accept their licensing.
+Import Unity project from `unity-project`. Open the 'OutdoorsScene' (found in Project window under Assets). You should see the 3D model in the viewport and all objects in the Hierarchy window. Click Unity's run button and ask the question. Remeber that first question after the server restart takes longer (it loads the AI models into VRAM).
+
+Read ["Oculus Lipsync for Unity Development"](https://developer.oculus.com/documentation/unity/audio-ovrlipsync-unity/) beforehand (requires Windows/macOS). Their documentation also contains the "Download and Import" section in case of any problems. Make sure to accept their licensing.
 
 > I've added Oculus Lipsync's source code to this repo as it required some extra fixes inside C# scripts. **Tested on Windows.**
 
 To create a production build follow official docs: [Publishing Builds](https://docs.unity3d.com/Manual/PublishingBuilds.html).
+
+Once everything is working, try adding DeepSpeed and TTS streaming for better performance (see below).
 
 ## Customization
 

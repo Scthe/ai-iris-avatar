@@ -35,28 +35,6 @@ sysinfo.txt
 # https://forum.unity.com/threads/uielementsschema.954252/
 UIElementsSchema
 
-# Temporary
-# Assets/Oculus
-# raw resources
-# *.fbx
-# *.wav
-# *.jpg
-# *.svg
-# *.prefab
-# *.png
-# *.tif
-# *.exr
-# unity resources
-# *.meta
-# *.vfx
-# *.shadergraph
-# *.shadersubgraph
-# *.mat
-# *.controller
-# *.anim
-# *.asset
-# UIElementsSchema
-
 
 #########
 # Probably OK if this stays for release
@@ -69,11 +47,5 @@ Assets/UI/images/icons.svg.meta
 Packages/com.unity.render-pipelines.high-definition-config
 
 #########
-# TO COMMIT BEFORE RELEASE
-# Animations - mixamo assets
-Assets/Animations/*.md
-Assets/Animations/*.md.meta
-Assets/Animations/**/*.anim
-
-# Lipsync
-Assets/Oculus
+# Oculus files. This file seems to not be needed. Is it embeded inside .dll?
+Assets/Oculus/LipSync/Assets/OfflineModel/ovrlipsync_offline_model.pb
