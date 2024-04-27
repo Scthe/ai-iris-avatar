@@ -1,7 +1,9 @@
-`TODO image here`
-`TODO unity - screen from editor, mark the play button`
 
 ## Usage
+
+![unity-viewport](https://github.com/Scthe/ai-iris-avatar/assets/9325337/05e37cd8-3632-4b72-b42b-bf783916fa86)
+_Screenshot from the Unity viewport._
+
 
 ### Install ollama to access LLM models
 
@@ -39,7 +41,7 @@ You can find other commands in the [makefile](makefile):
 
 ### Start the Unity client
 
-Import Unity project from `unity-project`. Open the 'OutdoorsScene' (found in Project window under Assets). You should see the 3D model in the viewport and all objects in the Hierarchy window. Click Unity's run button and ask the question. Remeber that first question after the server restart takes longer (it loads the AI models into VRAM).
+Import Unity project from `unity-project`. Open the `OutdoorsScene` (found in `Project` window under `Assets`). You should see the 3D model in the viewport and all objects in the `Hierarchy` window (just like on image above). Click Unity's run button. The Unity client should automatically connect to the Python server. At this point, go ahead and ask the character your question. Remember that the first question after the server restart takes longer (it loads the AI models into VRAM).
 
 Read ["Oculus Lipsync for Unity Development"](https://developer.oculus.com/documentation/unity/audio-ovrlipsync-unity/) beforehand (requires Windows/macOS). Their documentation also contains the "Download and Import" section in case of any problems. Make sure to accept their licensing.
 
