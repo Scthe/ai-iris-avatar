@@ -175,5 +175,5 @@ class AppLogic:
         await self.on_tts_first_chunk.send(msg_id, delta)
         print(
             colored("First TTS chunk:", "blue"),
-            f"{time_to_first_tts.delta}s",
+            f"{time_to_first_tts.delta:.2f}s",
         )

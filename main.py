@@ -15,6 +15,9 @@ def serve(config: str):
     """Start the server for TTS service"""
     # https://github.com/Scthe/rag-chat-with-context/blob/master/main.py#L175
 
+    import sys
+    import platform
+    import torch
     from server.server import create_server, start_server
     from server.socket_msg_handler import SocketMsgHandler
     from server.app_logic import AppLogic
@@ -23,6 +26,9 @@ def serve(config: str):
 
     cfg = load_app_config(config)
     print(colored("Config:", "blue"), cfg)
+    print(colored("OS:", "blue"), f"{platform.system()} ({platform.machine()})")
+    print(colored("Python:", "blue"), sys.version)
+    print(colored("Torch:", "blue"), f"{torch.__version__}")
 
     llm = AsyncClient(cfg.llm.api)
     tts = create_tts(cfg)

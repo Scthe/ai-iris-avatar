@@ -42,7 +42,7 @@ tts:
   # https://github.com/microsoft/DeepSpeed
   deepspeed_enabled: True
 
-  # Split text into smalelr chunks to stream them faser. Lower chunk size
+  # Split text into smaller chunks to stream them faser. Lower chunk size
   # reduces time to first sound, but might produce glitches between
   # chunks.
   # Recommended ON, but make sure that GPU can infer in real time (deepspeed helps).

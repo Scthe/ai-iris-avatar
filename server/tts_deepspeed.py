@@ -30,17 +30,24 @@ class FakeTTSWithRawXTTS2:
         self.synthesizer.output_sample_rate = tts_config.audio["output_sample_rate"]
 
         cloned_voice_wav = app_config.tts.sample_of_cloned_voice_wav
-        if cloned_voice_wav != None:
-            if self.streaming_enabled:
-                print(
-                    colored("Streaming with voice cloning:", "blue"),
-                    f"'{cloned_voice_wav}'",
-                )
-            gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
-                audio_path=[cloned_voice_wav]
+        self._generate_speaker_embedding_and_latents(model, cloned_voice_wav)
+
+    def _generate_speaker_embedding_and_latents(self, model, cloned_voice_wav):
+        if cloned_voice_wav == None:
+            return
+        if not self.streaming_enabled:
+            print(
+                colored("Unable to use voice cloning, streaming is off.", "red"),
+                f"Wanted to clone voice from: '{cloned_voice_wav}'.",
             )
-            self.gpt_cond_latent = gpt_cond_latent.to(self.model.device)
-            self.speaker_embedding = speaker_embedding.to(self.model.device)
+            return
+
+        print(colored("Voice clonning:", "blue"), f"'{cloned_voice_wav}'.")
+        gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
+            audio_path=[cloned_voice_wav]
+        )
+        self.gpt_cond_latent = gpt_cond_latent.to(self.model.device)
+        self.speaker_embedding = speaker_embedding.to(self.model.device)
 
     def _get_speaker_embedding_and_latents(self, speaker_name: str):
         """Used only for streaming mode"""
@@ -170,18 +177,29 @@ def raw_xtts_model_required(cfg: AppConfig):
     is_cfg_ds = cfg.tts.deepspeed_enabled
     is_cfg_stream = cfg.tts.streaming_enabled
 
-    reason_ds = f"is_xtts2={is_xtts2}, has_library={is_ds}, cfg_allows={is_cfg_ds}"
-    reason_stream = f"is_xtts2={is_xtts2}, cfg_allows={is_cfg_stream}"
+    reason_ds = (
+        f"is_xtts2={is_xtts2} AND has_library={is_ds} AND cfg_allows={is_cfg_ds}"
+    )
+    reason_stream = f"is_xtts2={is_xtts2} AND cfg_allows={is_cfg_stream}"
 
-    requires_raw_xtts = is_ds and is_xtts2 and (is_cfg_ds or is_cfg_stream)
+    use_ds = is_ds and is_cfg_ds
+    requires_raw_xtts = is_xtts2 and (use_ds or is_cfg_stream)
+    reason_raw_xtts = f"is_xtts2={is_xtts2} AND (use_deepspeed={use_ds} OR use_streaming={is_cfg_stream})"
     if requires_raw_xtts:
+        print(colored("Using FakeTTSWithRawXTTS2 wrapper:", "blue"), reason_raw_xtts)
         flag_str = lambda x: "ON" if x else "OFF"
-        print(colored("Deepspeed:", "blue"), flag_str(is_cfg_ds), f"({reason_ds})")
+        print(colored("Deepspeed:", "blue"), flag_str(use_ds), f"({reason_ds})")
         print(
             colored("Streaming:", "blue"), flag_str(is_cfg_stream), f"({reason_stream})"
         )
-        return create_wrapped_xtts(cfg, is_cfg_ds, is_cfg_stream)
+        return create_wrapped_xtts(cfg, use_ds, is_cfg_stream)
 
+    # fmt: off
+    print(
+        colored("Using original XTTS2 interface (instead of custom FakeTTSWithRawXTTS2):", "blue"),
+        reason_raw_xtts,
+    )
+    # fmt: on
     print(colored("Deepspeed:", "blue"), "OFF", f"({reason_ds})")
     print(colored("Streaming:", "blue"), "OFF", f"({reason_stream})")
     return None
